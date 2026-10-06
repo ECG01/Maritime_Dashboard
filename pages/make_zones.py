@@ -57,6 +57,14 @@ table.sum th{text-align:left;font:600 .68rem "Archivo",sans-serif;text-transform
   letter-spacing:.05em;color:var(--ink2);padding:.2rem .25rem;border-bottom:1px solid var(--line)}
 table.sum td{padding:.2rem .25rem;border-bottom:1px solid var(--grid);
   font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.trains td{border-bottom:1px solid var(--grid);padding:.1rem .25rem .3rem;
+  white-space:normal;line-height:1.5}
+tr.trains .lbl{font:700 .62rem "Archivo",sans-serif;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink2);margin-right:.4rem}
+tr.trains .tr{display:inline-block;font-size:.8rem;background:var(--btn);
+  border:1px solid var(--line);border-radius:4px;padding:.02rem .34rem;
+  margin:.1rem .25rem .1rem 0;white-space:nowrap}
+tr.trains .at{color:var(--ink2);margin:0 .18rem}
 
 /* maps */
 .locator{flex:0 0 auto;width:132px}
@@ -124,6 +132,17 @@ table.beach td.s{font-variant-numeric:tabular-nums;white-space:nowrap}
   .locator{width:104px}.locator svg{width:104px}
 }
 """
+
+
+_COMPASS = ("N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+            "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW")
+
+
+def compass(deg):
+    """Grados -> rumbo de 16 puntos. Un marino lee 'ENE', no '67 grados'."""
+    if deg is None:
+        return ""
+    return _COMPASS[int((float(deg) % 360) / 22.5 + 0.5) % 16]
 
 
 def _view(geo):
@@ -336,13 +355,32 @@ def main():
         more = (f'<details class="more"><summary>'
                 f'{M.bi(f"{len(rest)} more periods", f"{len(rest)} periodos más")}'
                 f'</summary>{per_html(rest)}</details>' if rest else "")
-        rows = "".join(
-            "<tr>"
-            f'<td>{html.escape(p["label"].title())}</td>'
-            f'<td><span data-k="kt" data-v="{p.get("wind_kt", "")}"></span></td>'
-            f'<td><span data-k="m" data-v="{p.get("hs_m", "")}"></span></td>'
-            f'<td><span data-k="s" data-v="{p.get("tp_s", "")}"></span></td>'
-            "</tr>" for p in head)
+        def row(p):
+            h = ("<tr>"
+                 f'<td>{html.escape(p["label"].title())}</td>'
+                 f'<td><span data-k="kt" data-v="{p.get("wind_kt", "")}"></span></td>'
+                 f'<td><span data-k="kt" data-v="{p.get("gust_kt", "")}"></span></td>'
+                 f'<td><span data-k="m" data-v="{p.get("hs_m", "")}"></span></td>'
+                 f'<td><span data-k="s" data-v="{p.get("tp_s", "")}"></span></td>'
+                 "</tr>")
+            # El NWS lista a veces DOS trenes de ola, y la fila de arriba solo
+            # lleva el mayor. Esconder el otro borra la diferencia que importa:
+            # 0.9 m del este a 5 s y 0.9 m del norte a 11 s miden igual y no se
+            # parecen en nada - la de periodo largo es la que mueve un barco
+            # atracado y rompe en la barra.
+            trains = p.get("wave_trains") or []
+            if len(trains) > 1:
+                cel = " ".join(
+                    f'<span class="tr">{compass(t.get("dir_deg"))} '
+                    f'<span data-k="m" data-v="{t.get("hs_m", "")}"></span>'
+                    f'<span class="at">@</span>'
+                    f'<span data-k="s" data-v="{t.get("tp_s", "")}"></span></span>'
+                    for t in trains)
+                h += (f'<tr class="trains"><td colspan="5">'
+                      f'<span class="lbl">{M.bi("Trains", "Trenes")}</span>{cel}</td></tr>')
+            return h
+
+        rows = "".join(row(p) for p in head)
         sitelist = (", ".join(M.bi(s["name_en"], s["name_es"]) for s in mine)
                     if mine else M.bi("No board locations in this zone",
                                       "Ningún lugar del tablero en esta zona"))
@@ -360,9 +398,10 @@ def main():
         "Servicio Nacional de Meteorología &mdash; tal como se emitió")}</div>
       {per_html(head)}{more}</div>
     <div class="ours"><div class="colh">{M.bi(
-        "CariCOOS reading of the numbers", "Lectura CariCOOS de los números")}</div>
+        "Summary of the Numbers", "Resumen de los números")}</div>
       <table class="sum"><thead><tr>
         <th>{M.bi("Period", "Periodo")}</th><th>{M.bi("Wind", "Viento")}</th>
+        <th>{M.bi("Gust", "Ráfaga")}</th>
         <th>{M.bi("Seas", "Oleaje")}</th><th>{M.bi("Per.", "Per.")}</th>
       </tr></thead><tbody>{rows}</tbody></table></div>
   </div>
