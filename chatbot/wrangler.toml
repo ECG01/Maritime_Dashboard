@@ -3,13 +3,14 @@ main = "worker.ts"
 compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
 
-[vars]
-# Donde se publica chat_context.json. CAMBIA ESTO si el tablero se muda:
-# si apunta al sitio viejo, el chatbot contesta con un snapshot obsoleto y
-# nada en la respuesta lo delata.
-# 2026-10-01: el tablero vive en caribe. Pasar a https en cuanto haya TLS -
-# hoy el snapshot viaja en claro (es dato publico, pero aun asi).
-CONTEXT_URL = "http://136.145.116.150/Maritime_Dashboard/chat_context.json"
+# CONTEXT_URL ya NO vive aqui. Cambia segun donde este desplegado el tablero,
+# asi que en un archivo versionado cada `git pull` lo pisaba y un `deploy`
+# posterior rompia el chatbot en silencio - paso el 2026-10-06.
+# Se pone como SECRETO, que es lo unico que `wrangler deploy` no toca:
+#   npx wrangler secret put CONTEXT_URL
+# El valor es la URL publica de chat_context.json, p.ej.
+#   https://<host>/Maritime_Dashboard/chat_context.json
+
 
 # Secrets are NOT set here - they would end up in version control.
 #   npx wrangler secret put ANTHROPIC_API_KEY

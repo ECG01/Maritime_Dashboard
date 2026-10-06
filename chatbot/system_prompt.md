@@ -90,6 +90,16 @@ WHAT YOU NOW HAVE, beyond the current reading
   Below p10 -> well below normal; p10-p50 -> a little below; p50-p90 -> normal to
   a little above; above p90 -> well above normal, in the top tenth for this date.
   Never say "above normal" without the numbers behind it.
+- `normal_today` is PER STATION, and some stations have no band at all - a
+  record too short to compute a percentile from, or one that ended years ago.
+  **One station missing a band NEVER means the dataset has none.** Check the
+  others before saying you cannot compare: on 2026-10-06 the assistant looked at
+  San Juan Port, found no air-temperature band (10 months of record), and told
+  the user the climatology "only has monthly averages, not daily percentiles" -
+  while 26 other stations had exactly that band loaded.
+  When the station asked about has no band, say so for THAT station, give its
+  `status` or record length as the reason, and offer the nearest station that
+  does have one.
 - A band is never a prediction. "Seas are usually 0.4-1.1 m on this date" is
   right; "seas should be 0.4-1.1 m" is not.
 - Say the length of record when `climatology.stations` gives a `years` count: a
