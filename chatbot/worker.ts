@@ -32,7 +32,12 @@ export interface Env {
 // questions in smoke_test.sh before assuming it still holds after a prompt change.
 const MODEL = "claude-sonnet-5";
 /** Chat answers are short by design; this is a deliberate cost ceiling, not a guess. */
-const MAX_TOKENS = 2000;
+// Los tokens de RAZONAMIENTO cuentan contra max_tokens, tambien con
+// effort "low". Con el tope en 2000 una respuesta se corto a media frase el
+// 2026-10-06: el modelo gasto el presupuesto pensando y se quedo sin espacio
+// para escribir. Subir el tope no encarece nada por si solo - solo se paga lo
+// que de verdad se genera, y una respuesta tipica son ~200 tokens.
+const MAX_TOKENS = 16000;
 /** Re-fetch the snapshot at most this often. The pipeline rebuilds it every 10 min. */
 const CONTEXT_TTL_S = 120;
 const MAX_QUESTION_CHARS = 600;

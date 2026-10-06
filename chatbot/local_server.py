@@ -38,7 +38,10 @@ sys.path.insert(0, ROOT)
 # testing locally on a different model than production tests the wrong thing.
 MODEL = os.environ.get("CHAT_MODEL", "claude-sonnet-5")
 EFFORT = os.environ.get("CHAT_EFFORT", "low")
-MAX_TOKENS = 2000
+# Los tokens de RAZONAMIENTO cuentan contra max_tokens, tambien con
+# effort "low". Con el tope en 2000 una respuesta se corto a media frase el
+# 2026-10-06. Subir el tope no encarece por si solo: solo se paga lo generado.
+MAX_TOKENS = 16000
 MAX_QUESTION_CHARS = 600
 MAX_HISTORY_TURNS = 8
 TOKEN = os.environ.get("CHAT_ACCESS_TOKEN", "local")
