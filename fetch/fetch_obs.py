@@ -54,7 +54,10 @@ _KT = {"knots": 1.0, "knot": 1.0, "kt": 1.0, "kts": 1.0,
        "m/s": 1.9438444924406046, "m s-1": 1.9438444924406046,
        "meters/second": 1.9438444924406046, "m s^-1": 1.9438444924406046,
        "mph": 0.868976, "miles per hour": 0.868976, "miles/hour": 0.868976,
-       "km/h": 0.539957, "kph": 0.539957, "kilometers/hour": 0.539957}
+       "km/h": 0.539957, "kph": 0.539957, "kilometers/hour": 0.539957,
+       # El ADCP de las boyas publica en cm/s. Sin esta fila _conv lo SALTA en
+       # vez de adivinar, que es lo correcto - pero entonces no hay corriente.
+       "cm/s": 0.019438444924406046, "cm s-1": 0.019438444924406046}
 _M = {"m": 1.0, "meters": 1.0, "metres": 1.0, "meter": 1.0,
       "ft": 0.3048, "feet": 0.3048, "cm": 0.01}
 
@@ -209,10 +212,15 @@ def buoy_waves(env, src):
         return {"obs_utc": _last_time(ds),
                 "hs_m": _conv(_num(ds, "significant_wave_height"), hu, _M, "wave height", stid),
                 "tp_s": _num(ds, "dominant_wave_period"),
+                # La ola MAXIMA, no solo la significativa. Hs es el promedio del
+                # tercio mayor; hmax es la que de verdad golpea, y es la que
+                # guardan los records historicos (8.16 m en PR1 con Maria).
+                "hmax_m": _conv(_num(ds, "max_wave_height"), hu, _M, "max wave", stid),
                 "dp_deg": _num(ds, "mean_wave_direction"), "wave_units": hu,
                 "qc": None if qc is None else int(qc), "file": files[-1].split("/")[-1],
                 "last24h": _stats24(ds, "time",
                                     {"hs_m": ("significant_wave_height", _M),
+                                     "hmax_m": ("max_wave_height", _M),
                                      "tp_s": ("dominant_wave_period", None)}, stid)}
     finally:
         ds.close()
@@ -271,6 +279,78 @@ def buoy_ocean(env, src):
         ds.close()
 
 
+def buoy_currents(env, src):
+    """Surface current from the buoy's ADCP.
+
+    The last stream to be wired up, and the one with the most behind it:
+    `engine/derive.py` has carried `wind_vs_current()` from the start, and
+    `config/thresholds.tsv` has a `wind_vs_curr` limit for passages and inlets -
+    the physics and the policy were written and tested, and had no current data
+    to run on until 2026-10-06.
+
+    Two details that would be wrong if assumed instead of read:
+
+    * The file reports a PROFILE - speed is (time, depth) over ~36 bins. The
+      shallowest bin is what a hull feels, so that is the one taken; a blind
+      index would silently report the current 38 m down.
+    * `current_direction` is `sea_water_velocity_to_direction` - degrees TOWARD
+      which the water flows, true north. That is exactly what wind_vs_current()
+      wants for `curr_to_deg`. Waves and wind in this project are FROM. Mixing
+      the two conventions reverses the opposing component, turning the calmest
+      case into the roughest.
+    """
+    import netCDF4
+    import numpy as np
+    stid = src["src_id"]
+    try:
+        ents = _catalog(env, f"{src['endpoint']}/Currents")
+    except Exception as e:
+        log(f"  {stid}: currents catalog failed ({type(e).__name__})")
+        return None
+    pat = re.compile(rf"/{re.escape(stid)}\d*\.currents\.adcp\.merged\.nc$", re.I)
+    files = sorted(x for x in ents if pat.search("/" + x))
+    if not files:
+        log(f"  {stid}: no merged currents file in catalog")
+        return None
+    try:
+        ds = netCDF4.Dataset(f"{env['THREDDS_BASE']}/dodsC/{files[-1]}")
+    except Exception as e:
+        log(f"  {stid}: currents open failed ({type(e).__name__})")
+        return None
+    try:
+        depth = np.atleast_1d(np.ma.filled(ds.variables["depth"][:], np.nan))
+        ok = np.where(np.isfinite(depth))[0]
+        if not len(ok):
+            log(f"  {stid}: currents file has no usable depth axis")
+            return None
+        k = int(ok[np.argmin(depth[ok])])          # el bin mas somero
+        su = _units(ds, "current_speed")
+
+        def _bin(name):
+            v = ds.variables.get(name)
+            if v is None:
+                return None
+            a = np.ma.masked_invalid(v[-1, k] if v.ndim == 2 else v[-1])
+            return None if a is np.ma.masked or a.mask else round(float(a), 2)
+
+        # La bandera QARTOD tambien es un perfil, una por bin - leerla como
+        # escalar reventaba con "only length-1 arrays can be converted".
+        qc = _bin("current_speed_qc_agg")
+        if qc is not None and qc >= QC_FAIL:
+            log(f"  {stid}: current flagged QARTOD {int(qc)} (fail), dropped")
+            return None
+        spd = _conv(_bin("current_speed"), su, _KT, "current", stid)
+        return {"obs_utc": _last_time(ds),
+                "curr_kt": spd,
+                "curr_to_deg": _bin("current_direction"),
+                "curr_depth_m": round(float(depth[k]), 1),
+                "current_units": su,
+                "curr_qc": None if qc is None else int(qc),
+                "currents_file": files[-1].split("/")[-1]}
+    finally:
+        ds.close()
+
+
 def cdip_waves(env, src):
     import netCDF4
     try:
@@ -316,10 +396,15 @@ def buoy_wind(env, src):
         return None
     try:
         wu, gu = _units(ds, "wind_speed"), _units(ds, "wind_gust")
+        au = _units(ds, "air_temperature")
         return {"obs_utc": _last_time(ds),
                 "wind_kt": _conv(_num(ds, "wind_speed"), wu, _KT, "wind", stid),
                 "gust_kt": _conv(_num(ds, "wind_gust"), gu, _KT, "gust", stid),
                 "wdir_deg": _num(ds, "wind_direction"),
+                # Mar adentro no hay estaciones de tierra, asi que la boya es la
+                # unica fuente de aire y presion en su zona.
+                "atemp_c": _to_c(_num(ds, "air_temperature"), au, stid, "air temp"),
+                "pres_mb": _num(ds, "barometric_pressure"),
                 "wind24h": _stats24(ds, "time",
                                     {"wind_kt": ("wind_speed", _KT),
                                      "gust_kt": ("wind_gust", _KT)}, stid)}
@@ -460,6 +545,40 @@ def ndbc(env, want):
     return out
 
 
+def _fetch_one(env, s):
+    """Todos los streams de una fuente, combinados en un solo registro.
+
+    Separada de main() para que una estacion que revienta se pueda aislar sin
+    envolver el bucle entero en un try - y para que se lea de un vistazo que
+    una boya son CUATRO lecturas distintas, no una.
+    """
+    prov = s["provider"]
+    if prov != "caricoos_buoy":
+        # .get, no [] : ndbc y coops se recogen en otro bucle, asi que aqui
+        # devuelven None como hacia el if/elif original. Con corchetes lanzaban
+        # KeyError y, antes de aislar los fallos, eso tumbaba el run entero.
+        fn = {"cdip": cdip_waves, "caricoos_mesonet": mesonet_wind,
+              "windnet_nc": windnet_nc, "windnet_dap": windnet_dap}.get(prov)
+        return fn(env, s) if fn else None
+
+    r = buoy_waves(env, s)
+    # Oleaje, viento, CTD y ADCP son cuatro archivos con sus propios tiempos. El
+    # del oleaje manda como tiempo del registro; los demas viajan con el suyo
+    # propio, porque una corriente de hace tres horas junto a un oleaje de hace
+    # diez minutos no es una lectura, son dos.
+    for fn, marca in ((buoy_wind, "wind_obs_utc"), (buoy_ocean, "ocean_obs_utc"),
+                      (buoy_currents, "curr_obs_utc")):
+        x = fn(env, s)
+        if not x:
+            continue
+        if r is None:
+            r = x
+        else:
+            r.update({k: v for k, v in x.items() if k != "obs_utc"})
+            r[marca] = x["obs_utc"]
+    return r
+
+
 def main(argv):
     problems = M.validate()
     if problems:
@@ -478,37 +597,21 @@ def main(argv):
         if only and sid not in only:
             continue
         r = None
-        if s["provider"] == "caricoos_buoy":
-            r = buoy_waves(env, s)
-            w = buoy_wind(env, s)
-            if w:
-                if r is None:
-                    r = w
-                else:
-                    # keep the wave timestamp as the record's own; wind rides along
-                    r.update({k: v for k, v in w.items() if k != "obs_utc"})
-                    r["wind_obs_utc"] = w["obs_utc"]
-            o = buoy_ocean(env, s)
-            if o:
-                if r is None:
-                    r = o
-                else:
-                    r.update({k: v for k, v in o.items() if k != "obs_utc"})
-                    r["ocean_obs_utc"] = o["obs_utc"]
-        elif s["provider"] == "cdip":
-            r = cdip_waves(env, s)
-        elif s["provider"] == "caricoos_mesonet":
-            r = mesonet_wind(env, s)
-        elif s["provider"] == "windnet_nc":
-            r = windnet_nc(env, s)
-        elif s["provider"] == "windnet_dap":
-            r = windnet_dap(env, s)
+        try:
+            r = _fetch_one(env, s)
+        except Exception as e:                                   # noqa: BLE001
+            # Una estacion que revienta NO puede llevarse las otras 24 por
+            # delante. Paso el 2026-10-06: una variable QARTOD con forma
+            # inesperada en una boya aborto el run completo y dejo el tablero
+            # entero con los datos de la hora anterior, sin ningun aviso.
+            log(f"  {sid}: FALLO ({type(e).__name__}: {e}); se omite esta estacion")
+            continue
         if not r or not r.get("obs_utc"):
             continue
         r["src_id"] = sid
         r["provider"] = s["provider"]
         obs[sid] = r
-
+        continue
     for sid, r in ndbc(env, {s["endpoint"]: i for i, s in srcs.items()
                              if s["provider"] == "ndbc"}).items():
         r["src_id"] = sid

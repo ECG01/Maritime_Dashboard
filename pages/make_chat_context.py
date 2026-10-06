@@ -131,10 +131,29 @@ def main():
                        ("wdir_deg", "wind_from_deg"), ("hs_m", "seas_m"),
                        ("tp_s", "wave_period_s"), ("dp_deg", "seas_from_deg"),
                        ("wtemp_c", "water_temp_c"), ("atemp_c", "air_temp_c"),
-                       ("salinity_psu", "salinity_psu")):
+                       ("salinity_psu", "salinity_psu"),
+                       ("hmax_m", "max_wave_m"), ("pres_mb", "pressure_mb"),
+                       ("curr_kt", "current_kt"),
+                       ("curr_to_deg", "current_toward_deg"),
+                       ("curr_depth_m", "current_depth_m")):
             v = _r(r.get(k), 2)
             if v is not None:
                 entry[out] = v
+        # Viento contra corriente. Se calcula SOLO en las boyas porque son el
+        # unico sitio donde las dos se miden en el mismo punto: cruzar el viento
+        # de una estacion de tierra con la corriente de una boya a kilometros
+        # seria un numero inventado con pinta de medicion.
+        #
+        # derive.wind_vs_current espera el viento DESDE y la corriente HACIA,
+        # que es justo como los publican los archivos. Es un indice de CariCOOS
+        # en nudos de viento, no una magnitud estandar, y thresholds.tsv le pone
+        # 8 kt de precaucion y 14 de no-go para embarcaciones pequenas en
+        # pasajes y entradas de puerto.
+        wvc = D.wind_vs_current(r.get("wind_kt"), r.get("wdir_deg"),
+                                r.get("curr_kt"), r.get("curr_to_deg"))
+        if wvc is not None:
+            entry["wind_against_current_kt"] = _r(wvc, 1)
+
         last24 = {}
         for src_block in (h24, w24, r.get("ocean24h") or {}):
             for k, v in src_block.items():
@@ -150,7 +169,14 @@ def main():
                          "which is UTC-4 year round with no daylight saving.",
         "units_note": "Wind and gusts in knots, seas and tide levels in metres, "
                       "wave period in seconds, directions in degrees the wind or "
-                      "waves come FROM. Steepness is Hs/(1.56*Tp^2), dimensionless.",
+                      "waves come FROM - EXCEPT current_toward_deg, which is "
+                      "where the water flows TO. Steepness is Hs/(1.56*Tp^2), "
+                      "dimensionless. wind_against_current_kt is a CariCOOS "
+                      "index in knots of wind, not a standard quantity: wind "
+                      "speed times how directly it opposes the current, scaled "
+                      "by current strength. It is what shortens and steepens a "
+                      "sea, and it is computed only where one platform measures "
+                      "both.",
         "forecast": {
             "office": cwf.get("office", "SJU"),
             "product": "NWS Coastal Waters Forecast",
@@ -269,7 +295,7 @@ def _climatology():
     doy = now_ast.timetuple().tm_yday - 1
 
     stations, normal, monthly, records = {}, {}, {}, {}
-    for kind, vars_ in (("buoy", ("hs", "tp", "temp")),
+    for kind, vars_ in (("buoy", ("hs", "hmax", "tp", "temp")),
                             ("wind", ("ws", "gust", "temp"))):
         bands = c.get(f"{kind}_bands") or {}
         mon = c.get(f"{kind}_monthly") or {}

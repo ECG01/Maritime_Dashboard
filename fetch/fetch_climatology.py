@@ -42,9 +42,9 @@ from engine import embedded_json as E           # noqa: E402
 # units_note promises metric, and a degF value inside a document that declares
 # degC is exactly how a confidently wrong answer gets made. Buoy water
 # temperature stays - it is already degC.
-BUOY_VARS = ("hs", "tp", "temp")
+BUOY_VARS = ("hs", "hmax", "tp", "temp")
 WIND_VARS = ("ws", "gust", "temp")
-BUOY_MONTHLY = ("hs_mean", "hs_p95", "tp_mean", "temp_mean")
+BUOY_MONTHLY = ("hs_mean", "hs_p95", "hmax_p95", "tp_mean", "temp_mean")
 WIND_MONTHLY = ("ws_mean", "gust_p95", "temp_mean")
 
 # The mesonet publishes air temperature in FAHRENHEIT while every live reading
