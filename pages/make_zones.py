@@ -65,6 +65,8 @@ tr.trains .tr{display:inline-block;font-size:.8rem;background:var(--btn);
   border:1px solid var(--line);border-radius:4px;padding:.02rem .34rem;
   margin:.1rem .25rem .1rem 0;white-space:nowrap}
 tr.trains .at{color:var(--ink2);margin:0 .18rem}
+.nodet{font-size:.76rem;color:var(--ink2);line-height:1.4;margin-top:.45rem;
+  padding-top:.4rem;border-top:1px dashed var(--line)}
 
 /* maps */
 .locator{flex:0 0 auto;width:132px}
@@ -368,8 +370,13 @@ def main():
             # 0.9 m del este a 5 s y 0.9 m del norte a 11 s miden igual y no se
             # parecen en nada - la de periodo largo es la que mueve un barco
             # atracado y rompe en la barra.
+            #
+            # Se muestra tambien con UN solo tren, aunque parezca redundante:
+            # la fila de arriba no tiene columna de direccion, asi que esta es
+            # la unica linea donde aparece de donde viene la mar. Con la
+            # condicion en >1 se perdia en 10 de los 100 periodos.
             trains = p.get("wave_trains") or []
-            if len(trains) > 1:
+            if trains:
                 cel = " ".join(
                     f'<span class="tr">{compass(t.get("dir_deg"))} '
                     f'<span data-k="m" data-v="{t.get("hs_m", "")}"></span>'
@@ -377,10 +384,21 @@ def main():
                     f'<span data-k="s" data-v="{t.get("tp_s", "")}"></span></span>'
                     for t in trains)
                 h += (f'<tr class="trains"><td colspan="5">'
-                      f'<span class="lbl">{M.bi("Trains", "Trenes")}</span>{cel}</td></tr>')
+                      f'<span class="lbl">{M.bi("Wave detail", "Detalle de olas")}</span>'
+                      f'{cel}</td></tr>')
             return h
 
         rows = "".join(row(p) for p in head)
+        # El NWS deja de publicar "Wave Detail" en los dias lejanos - 40 de 100
+        # periodos ahora mismo. Sin decirlo, una fila sin esa linea se lee como
+        # un fallo nuestro en vez de como el limite del producto que es.
+        sin_detalle = [p for p in head if not (p.get("wave_trains") or [])]
+        nota = (f'<div class="nodet">{M.bi(
+            "The NWS stops publishing Wave Detail on the later days, so those "
+            "periods carry sea height but no direction or period.",
+            "El NWS deja de publicar el Wave Detail en los días lejanos, así que "
+            "esos periodos traen altura de mar pero no dirección ni periodo.")}</div>'
+            if sin_detalle else "")
         sitelist = (", ".join(M.bi(s["name_en"], s["name_es"]) for s in mine)
                     if mine else M.bi("No board locations in this zone",
                                       "Ningún lugar del tablero en esta zona"))
@@ -403,7 +421,7 @@ def main():
         <th>{M.bi("Period", "Periodo")}</th><th>{M.bi("Wind", "Viento")}</th>
         <th>{M.bi("Gust", "Ráfaga")}</th>
         <th>{M.bi("Seas", "Oleaje")}</th><th>{M.bi("Per.", "Per.")}</th>
-      </tr></thead><tbody>{rows}</tbody></table></div>
+      </tr></thead><tbody>{rows}</tbody></table>{nota}</div>
   </div>
 </div>""")
 
