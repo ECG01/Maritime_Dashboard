@@ -1,0 +1,22 @@
+# Runtime dependencies. Verified 2026-09-30 by walking every import in fetch/,
+# pages/, engine/ and the two libraries - this is the whole list, not a guess.
+#
+#   netCDF4   fetch/fetch_obs.py   - OPeNDAP reads from DM1 THREDDS
+#   numpy     fetch/fetch_obs.py   - masking and the 24 h statistics
+#   shapely   fetch/fetch_zonegeo.py - simplifying NWS zone polygons for the map
+#
+# Everything else is the standard library. All HTTP goes through urllib, so
+# there is no `requests`, and nothing here needs a compiler beyond the wheels.
+netCDF4
+numpy
+shapely
+
+# NOT required, though an earlier version of this file listed them:
+#   pandas, pyarrow - only `hublib.atomic_write_parquet()` would need them, and
+#   nothing in this project calls it. It is vendored from the Ocean Buoys Hub
+#   for drift-checking, not for use. If a future page ever writes a DataFrame,
+#   add them back - and add them here, not just to the server.
+#
+# The chatbot is deliberately separate: chatbot/run_local.sh builds its OWN venv
+# (chatbot/.venv) with `anthropic`, so the dashboard's environment never has to
+# carry an SDK it does not use. The Cloudflare Worker needs neither.

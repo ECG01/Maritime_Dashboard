@@ -1,0 +1,16 @@
+name = "caricoos-maritime-chat"
+main = "worker.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Donde se publica chat_context.json. CAMBIA ESTO si el tablero se muda:
+# si apunta al sitio viejo, el chatbot contesta con un snapshot obsoleto y
+# nada en la respuesta lo delata.
+# 2026-10-01: el tablero vive en caribe. Pasar a https en cuanto haya TLS -
+# hoy el snapshot viaja en claro (es dato publico, pero aun asi).
+CONTEXT_URL = "http://136.145.116.150/Maritime_Dashboard/chat_context.json"
+
+# Secrets are NOT set here - they would end up in version control.
+#   npx wrangler secret put ANTHROPIC_API_KEY
+#   npx wrangler secret put CHAT_ACCESS_TOKEN

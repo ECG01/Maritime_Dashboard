@@ -1,0 +1,36 @@
+# Vessel class x variable -> Marginal / Unfavorable limits for Operational Suitability.
+# THIS FILE IS THE POLICY. No threshold is ever hardcoded in Python; methods.html
+# renders this table verbatim, including the source column, so the published
+# methodology cannot drift from the ratings.
+#
+# NOTE ON LANGUAGE: what this file drives is CariCOOS "Operational Suitability"
+# (Favorable / Marginal / Unfavorable). It is NOT an advisory, warning or watch -
+# those are official National Weather Service product names and are used on these
+# pages only when quoting NWS verbatim.
+#
+# class       ship 	 ferry 	 small 	 rec
+# var         canonical variable produced by engine/derive.py
+# dir         high = larger is worse (usual); low = smaller is worse (roll_ratio)
+# marginal    value at which the class becomes Marginal
+# unfavorable value at which the class becomes Unfavorable
+# unit        canonical unit the limits are expressed in (SI; the page converts)
+# applies_to  comma list of site kinds, or 'route', or '*' for all
+# source      the citation, rendered on methods.html. '- VERIFY' = not yet confirmed.
+# notes       free text
+class	var	dir	marginal	unfavorable	unit	applies_to	source	notes
+small	wind_kt	high	18	25	kt	*	NWS SJU Small Craft Advisory band (sustained 20-33 kt) - VERIFY	marginal sits below the SCA floor so the page flags before the official product issues
+small	gust_kt	high	25	33	kt	*	NWS SCA upper bound; Beaufort 7 - VERIFY	gusts drive small-craft handling more than the mean wind
+small	hs_m	high	1.5	2.0	m	*	NWS SJU SCA seas 6 ft = 1.83 m - VERIFY	1.5 m approx 5 ft marginal; 2.0 m approx 6.5 ft unfavorable
+small	steepness	high	0.035	0.045	-	*	WMO-No.702 Guide to Wave Analysis and Forecasting	Hs/(1.56*Tp^2). Steep short seas, not Hs alone, are the small-craft hazard
+small	hs_m	high	1.0	1.4	m	inlet	operator judgement - CARICOOS to confirm	breaking bar at the inlet mouth; guidance only
+small	wind_vs_curr	high	8	14	kt	passage,inlet	seamanship practice - CARICOOS to confirm	opposing wind-vs-current component; shortens and steepens the sea
+ferry	hs_beam_m	high	1.2	1.8	m	route	IMO MSC.1/Circ.1228 beam-sea guidance	Hs * abs(sin(angle between track and wave direction))
+ferry	roll_ratio	low	0.30	0.15	-	route	IMO MSC.1/Circ.1228 synchronous rolling	abs(Te/Tr - 1); SMALLER is worse, hence dir=low
+ferry	gust_kt	high	28	35	kt	route,port,anchorage,inlet	operator practice; NWS Gale criteria 34 kt - VERIFY	passenger service usually suspends before a mariner would
+ferry	hs_m	high	1.8	2.5	m	route,port,anchorage,inlet	operator practice - VERIFY with the ferry operators	absolute seas limit independent of heading
+ship	wind_kt	high	25	34	kt	port,passage	NWS Gale criteria 34 kt; typical terminal crane limit approx 25 kt - VERIFY	confirm with each port authority
+ship	lp_swell_m	high	0.7	1.2	m	port,passage	PIANC WG24 / WG115 moored-ship motions	only evaluated when Tp >= 14 s; this is the berth-ranging signal
+ship	hs_m	high	2.5	3.5	m	port,passage	pilot-boarding practice - VERIFY with PR/USVI pilots	pilot ladder transfer at the sea buoy
+rec	wind_kt	high	15	22	kt	*	Beaufort 4 / 6; comfort not safety	
+rec	hs_m	high	1.0	1.5	m	*	operator judgement; comfort threshold	combined with the exposure arc and Tp > 9 s for anchorages
+rec	steepness	high	0.030	0.040	-	*	WMO-No.702	recreational craft feel steepness before they feel height

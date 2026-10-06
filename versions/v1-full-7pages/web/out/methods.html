@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<title>Methods &middot; CariCOOS Maritime</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+
+<style>:root{color-scheme:light;
+  --surface:#d9e5ed; --panel:#f1f6f9; --ink:#122a3a; --ink2:#51677a; --grid:#dbe6ec;
+  --line:#c0d2dc; --s1:#2a78d6; --s2:#eb6834; --tip-bg:#f1f6f9; --tip-edge:#a9bfcc;
+  --btn:#dfeaf1; --btn-on:#0b3a5c; --btn-on-ink:#ffffff; --sel:rgba(0,150,180,.15);
+  --navy:#0b3a5c; --navy-ink:#ffffff; --navy-sub:#9fc3d9; --teal:#0096b4;
+  --controls:#e7f0f5; --flag:#c0392b; --flag2:#7c3aed; --ok:#1e8e5a;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){color-scheme:dark;
+    --surface:#101c26; --panel:#162733; --ink:#e8eef3; --ink2:#9db2c2; --grid:#25384633;
+    --line:#2b4152; --s1:#3987e5; --s2:#d95926; --tip-bg:#1c2e3c; --tip-edge:#3c566a;
+    --btn:#1c2e3c; --btn-on:#3ba7c4; --btn-on-ink:#08131b; --sel:rgba(59,167,196,.25);
+    --navy:#092c46; --navy-ink:#e8eef3; --navy-sub:#7fa6bf; --teal:#3ba7c4;
+    --controls:#14232e; --flag:#ff6f61; --flag2:#b794f6; --ok:#4cc38a;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --surface:#101c26; --panel:#162733; --ink:#e8eef3; --ink2:#9db2c2; --grid:#25384633;
+  --line:#2b4152; --s1:#3987e5; --s2:#d95926; --tip-bg:#1c2e3c; --tip-edge:#3c566a;
+  --btn:#1c2e3c; --btn-on:#3ba7c4; --btn-on-ink:#08131b; --sel:rgba(59,167,196,.25);
+  --navy:#092c46; --navy-ink:#e8eef3; --navy-sub:#7fa6bf; --teal:#3ba7c4;
+  --controls:#14232e; --flag:#ff6f61; --flag2:#b794f6; --ok:#4cc38a;}
+html[data-lang="es"] .lang-en{display:none !important}
+html:not([data-lang="es"]) .lang-es{display:none !important}
+.langbtn{font:600 .78rem "Archivo",sans-serif; letter-spacing:.06em; border:1px solid rgba(255,255,255,.45);
+  background:transparent; color:var(--navy-ink,#fff); padding:.22rem .7rem; border-radius:999px; cursor:pointer}
+.langbtn:hover{background:rgba(255,255,255,.12)}
+
+:root{--warn:#c77700; --warn-ink:#ffffff; --nodata:#8496a4;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --warn:#e09b2d; --warn-ink:#1a1206; --nodata:#6d8291;}}
+:root[data-theme="dark"]{--warn:#e09b2d; --warn-ink:#1a1206; --nodata:#6d8291;}
+
+.chip{display:inline-flex;align-items:center;gap:.36em;font:600 .82rem "Source Sans 3",sans-serif;
+  padding:.16rem .55rem;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.chip .g{font-size:.9em;line-height:1}
+.chip.favorable{background:var(--ok);color:#fff}
+.chip.marginal{background:var(--warn);color:var(--warn-ink)}
+.chip.unfavorable{background:var(--flag);color:#fff}
+.chip.nodata{background:var(--btn);color:var(--ink2);border-color:var(--line)}
+.chip.notrated{background:transparent;color:var(--ink2);border-color:var(--line);border-style:dashed}
+
+.cell{display:flex;align-items:center;justify-content:center;min-height:1.6rem;
+  border-radius:3px;font:600 .7rem "Source Sans 3",sans-serif}
+.cell.favorable{background:var(--ok);color:#fff}
+.cell.marginal{background:var(--warn);color:var(--warn-ink)}
+.cell.unfavorable{background:var(--flag);color:#fff}
+.cell.nodata{background:var(--btn);color:var(--ink2);border:1px dashed var(--line)}
+.cell.notrated{background:transparent;color:var(--ink2);border:1px dotted var(--line)}
+
+/* NWS products sit in their own panel, visually distinct from anything we compute */
+.nws{border:2px solid var(--s2);border-radius:8px;background:var(--panel);padding:.85rem 1rem;margin:1rem 0}
+.nws h3{margin:0 0 .4rem;font:700 .95rem "Archivo",sans-serif;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--s2)}
+.nws .prod{margin:.5rem 0;padding-left:.7rem;border-left:3px solid var(--s2)}
+.nws .prod b{font:700 .95rem "Source Sans 3",sans-serif}
+.nws .meta{font:400 .8rem "Source Sans 3",sans-serif;color:var(--ink2)}
+.nws pre{white-space:pre-wrap;font:400 .82rem "JetBrains Mono",monospace;margin:.4rem 0 0}
+.nws .attrib{font:400 .78rem "Source Sans 3",sans-serif;color:var(--ink2);margin-top:.5rem}
+
+.disclaimer{border-top:1px solid var(--line);margin-top:1.6rem;padding-top:.8rem;
+  font:400 .82rem "Source Sans 3",sans-serif;color:var(--ink2)}
+.disclaimer b{color:var(--flag)}
+.agebadge{font:600 .72rem "Source Sans 3",sans-serif;padding:.05rem .4rem;border-radius:3px;
+  background:var(--btn);color:var(--ink2)}
+.agebadge.stale{background:var(--flag);color:#fff}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:.4rem .9rem;
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:.7rem .9rem;margin:.2rem 0 1rem}
+.legend .lg{display:flex;align-items:baseline;gap:.5rem}
+.legend .lgt{font-size:.86rem;color:var(--ink2);line-height:1.35}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);color:var(--ink);
+  font:400 1rem/1.5 "Source Sans 3",system-ui,sans-serif}
+header{background:var(--navy);color:var(--navy-ink)}
+.hwrap{max-width:1180px;margin:0 auto;padding:.9rem 1rem}
+.brandrow{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+h1{margin:.2rem 0 0;font:700 1.5rem "Archivo",sans-serif;letter-spacing:.01em}
+.sub{color:var(--navy-sub);font-size:.92rem;margin-top:.15rem}
+.ctrls{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.unitbtn,.tzbtn,.langbtn{font:600 .78rem "Archivo",sans-serif;letter-spacing:.06em;
+  border:1px solid rgba(255,255,255,.45);background:transparent;color:var(--navy-ink);
+  padding:.22rem .7rem;border-radius:999px;cursor:pointer}
+.unitbtn:hover,.tzbtn:hover{background:rgba(255,255,255,.12)}
+nav.tabs{background:var(--navy);border-top:1px solid rgba(255,255,255,.14)}
+nav.tabs .hwrap{padding:0 1rem;display:flex;gap:.2rem;overflow-x:auto}
+nav.tabs a{color:var(--navy-sub);text-decoration:none;padding:.55rem .8rem;white-space:nowrap;
+  font:600 .88rem "Source Sans 3",sans-serif;border-bottom:3px solid transparent}
+nav.tabs a:hover{color:var(--navy-ink)}
+nav.tabs a[aria-current="page"]{color:var(--navy-ink);border-bottom-color:var(--teal)}
+main{max-width:1180px;margin:0 auto;padding:1.2rem 1rem 2.5rem}
+h2{font:700 1.15rem "Archivo",sans-serif;margin:1.6rem 0 .6rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:1rem}
+footer{max-width:1180px;margin:0 auto;padding:0 1rem 2rem;color:var(--ink2);font-size:.85rem}
+a{color:var(--s1)}
+@media (max-width:720px){h1{font-size:1.25rem}.hwrap{padding:.7rem .8rem}main{padding:.9rem .8rem 2rem}}
+
+table.th{width:100%;border-collapse:collapse;background:var(--panel);
+  border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:1.2rem}
+table.th th{background:var(--controls);font:600 .76rem "Archivo",sans-serif;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);padding:.5rem .6rem;
+  text-align:left;border-bottom:1px solid var(--line)}
+table.th td{padding:.5rem .6rem;border-bottom:1px solid var(--grid);vertical-align:top;
+  font-size:.92rem}
+table.th td.lim{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.verify{display:inline-block;background:var(--flag);color:#fff;font:700 .68rem "Archivo",sans-serif;
+  letter-spacing:.06em;padding:.05rem .4rem;border-radius:3px;margin-left:.3rem}
+.src{font-size:.85rem;color:var(--ink2)}
+.vnote{font-size:.88rem;color:var(--ink2);margin:.2rem 0 0}
+.keybox{display:flex;gap:.8rem;flex-wrap:wrap;margin:.6rem 0 1.2rem}
+.keybox .k{display:flex;align-items:center;gap:.4rem;font-size:.9rem}
+h3{font:700 1rem "Archivo",sans-serif;margin:1.4rem 0 .4rem}
+.lead{max-width:62ch}
+</style>
+</head>
+<body>
+<script>(function(){var l='en';try{l=localStorage.getItem('buoys_lang')||((navigator.language||'').toLowerCase().indexOf('es')===0?'es':'en');}catch(e){}document.documentElement.setAttribute('data-lang',l);document.documentElement.lang=l;})();</script>
+<header><div class="hwrap">
+  <div class="brandrow">
+    <div style="display:flex;align-items:center;gap:.6rem"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M1.6 13.2c2.1 0 2.1 1.6 4.2 1.6s2.1-1.6 4.2-1.6 2.1 1.6 4.2 1.6 2.1-1.6 4.2-1.6 2.1 1.6 4.2 1.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 3.2v7.2M9.2 5.6h5.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div><h1><span class="lang-en">Methods</span><span class="lang-es">Métodos</span></h1>
+      <div class="sub"><span class="lang-en">How every rating is made</span><span class="lang-es">Cómo se hace cada evaluación</span></div></div></div>
+    <div class="ctrls"><button class="unitbtn" type="button" title="knots &amp; feet / metric">kt/ft</button><button class="tzbtn" type="button" title="UTC / AST (UTC−4)">UTC</button><button class="langbtn" type="button" title="English / Español">Español</button></div>
+  </div>
+</div></header>
+<nav class="tabs"><div class="hwrap"><a href="index.html"><span class="lang-en">Overview</span><span class="lang-es">Resumen</span></a><a href="conditions_now.html"><span class="lang-en">Conditions now</span><span class="lang-es">Condiciones ahora</span></a><a href="planner.html"><span class="lang-en">Planner</span><span class="lang-es">Planificador</span></a><a href="marine_zones.html"><span class="lang-en">NWS marine zones</span><span class="lang-es">Zonas marinas NWS</span></a><a href="tools.html"><span class="lang-en">Tools</span><span class="lang-es">Herramientas</span></a><a href="methods.html" aria-current="page"><span class="lang-en">Methods</span><span class="lang-es">Métodos</span></a><a href="status.html"><span class="lang-en">Data status</span><span class="lang-es">Estado de datos</span></a></div></nav>
+<main>
+
+<p class="lead"><span class="lang-en"><b>Operational Suitability</b> is CariCOOS's own assessment. It compares observed and forecast conditions against the published limits below, separately for each vessel class, and reports the worst result with the variable that caused it. It is <b>not</b> an official forecast, advisory or warning &mdash; those are issued only by the National Weather Service, and this dashboard reproduces them verbatim in a separate panel without feeding them into any rating.</span><span class="lang-es">La <b>Idoneidad Operacional</b> es la evaluación propia de CariCOOS. Compara las condiciones observadas y pronosticadas con los límites publicados abajo, por separado para cada clase de embarcación, e informa el peor resultado junto con la variable que lo causó. <b>No</b> es un pronóstico, aviso ni advertencia oficial: estos los emite únicamente el Servicio Nacional de Meteorología, y este tablero los reproduce literalmente en un panel aparte sin incorporarlos a ninguna evaluación.</span></p>
+<div class="keybox"><span class="k"><span class="chip favorable"><span class="g" aria-hidden="true">●</span><span class="lang-en">Favorable</span><span class="lang-es">Favorable</span></span></span><span class="k"><span class="chip marginal"><span class="g" aria-hidden="true">▲</span><span class="lang-en">Marginal</span><span class="lang-es">Marginal</span></span></span><span class="k"><span class="chip unfavorable"><span class="g" aria-hidden="true">■</span><span class="lang-en">Unfavorable</span><span class="lang-es">Desfavorable</span></span></span><span class="k"><span class="chip nodata"><span class="g" aria-hidden="true">–</span><span class="lang-en">No data</span><span class="lang-es">Sin datos</span></span></span><span class="k"><span class="chip notrated"><span class="g" aria-hidden="true">·</span><span class="lang-en">Not rated here</span><span class="lang-es">No evaluado aquí</span></span></span></div>
+<h2><span class="lang-en">Thresholds</span><span class="lang-es">Umbrales</span></h2>
+<p class="lead"><span class="lang-en">Every number below comes from <code>config/thresholds.tsv</code>, which this page reads directly. There is exactly one copy of these limits, so what you see here is what the ratings actually use. A limit whose provenance has not yet been confirmed carries a <span class="verify">VERIFY</span> tag and keeps it until somebody checks it.</span><span class="lang-es">Cada número proviene de <code>config/thresholds.tsv</code>, que esta página lee directamente. Existe una sola copia de estos límites, así que lo que ve aquí es lo que realmente usan las evaluaciones. Un límite cuya procedencia aún no se ha confirmado lleva la etiqueta <span class="verify">VERIFY</span> hasta que alguien lo verifique.</span></p>
+<table class="th">
+<thead><tr>
+<th><span class="lang-en">Variable</span><span class="lang-es">Variable</span></th>
+<th><span class="lang-en">Marginal</span><span class="lang-es">Marginal</span></th>
+<th><span class="lang-en">Unfavorable</span><span class="lang-es">Desfavorable</span></th>
+<th><span class="lang-en">Applies to</span><span class="lang-es">Aplica a</span></th>
+<th><span class="lang-en">Source</span><span class="lang-es">Fuente</span></th>
+</tr></thead>
+<tbody><tr><td colspan="5" style="background:var(--controls);font-weight:700"><span class="lang-en">Commercial ship</span><span class="lang-es">Buque comercial</span></td></tr><tr><td><b><span class="lang-en">Significant wave height (Hs)</span><span class="lang-es">Altura significativa del oleaje (Hs)</span></b></td><td class="lim"><span data-lim="2.5" data-kind="m">2.5</span></td><td class="lim"><span data-lim="3.5" data-kind="m">3.5</span></td><td><span class="lang-en">ports</span><span class="lang-es">puertos</span>, <span class="lang-en">passages</span><span class="lang-es">canales</span></td><td class="src">pilot-boarding practice - VERIFY with PR/USVI pilots<span class="verify">VERIFY</span></td></tr><tr><td><b><span class="lang-en">Long-period swell</span><span class="lang-es">Marejada de periodo largo</span></b><div class="vnote"><span class="lang-en">Evaluated <b>only</b> when the peak period is 14 s or longer. Below that it is not assessed at all, which is not the same as passing.</span><span class="lang-es">Se evalúa <b>solo</b> cuando el periodo pico es de 14 s o más. Por debajo no se evalúa en absoluto, lo cual no equivale a aprobar.</span></div></td><td class="lim"><span data-lim="0.7" data-kind="m">0.7</span></td><td class="lim"><span data-lim="1.2" data-kind="m">1.2</span></td><td><span class="lang-en">ports</span><span class="lang-es">puertos</span>, <span class="lang-en">passages</span><span class="lang-es">canales</span></td><td class="src">PIANC WG24 / WG115 moored-ship motions</td></tr><tr><td><b><span class="lang-en">Sustained wind</span><span class="lang-es">Viento sostenido</span></b></td><td class="lim"><span data-lim="25.0" data-kind="kt">25.0</span></td><td class="lim"><span data-lim="34.0" data-kind="kt">34.0</span></td><td><span class="lang-en">ports</span><span class="lang-es">puertos</span>, <span class="lang-en">passages</span><span class="lang-es">canales</span></td><td class="src">NWS Gale criteria 34 kt; typical terminal crane limit approx 25 kt - VERIFY<span class="verify">VERIFY</span></td></tr><tr><td colspan="5" style="background:var(--controls);font-weight:700"><span class="lang-en">Ferry / passenger</span><span class="lang-es">Ferry / pasajeros</span></td></tr><tr><td><b><span class="lang-en">Wind gusts</span><span class="lang-es">Ráfagas de viento</span></b></td><td class="lim"><span data-lim="28.0" data-kind="kt">28.0</span></td><td class="lim"><span data-lim="35.0" data-kind="kt">35.0</span></td><td><span class="lang-en">ferry routes</span><span class="lang-es">rutas de ferry</span>, <span class="lang-en">ports</span><span class="lang-es">puertos</span>, <span class="lang-en">anchorages</span><span class="lang-es">fondeaderos</span>, <span class="lang-en">inlets</span><span class="lang-es">entradas</span></td><td class="src">operator practice; NWS Gale criteria 34 kt - VERIFY<span class="verify">VERIFY</span></td></tr><tr><td><b><span class="lang-en">Beam-sea component</span><span class="lang-es">Componente de oleaje de través</span></b><div class="vnote"><span class="lang-en">Hs &middot; |sin(encounter angle)|, where the encounter angle is 0&deg; in a following sea, 90&deg; on the beam and 180&deg; head-on. This is the number that decides whether a ferry crossing is comfortable.</span><span class="lang-es">Hs &middot; |sen(ángulo de encuentro)|, donde el ángulo es 0&deg; con mar de popa, 90&deg; de través y 180&deg; de proa. Este es el número que decide si una travesía en ferry resulta cómoda.</span></div></td><td class="lim"><span data-lim="1.2" data-kind="m">1.2</span></td><td class="lim"><span data-lim="1.8" data-kind="m">1.8</span></td><td><span class="lang-en">ferry routes</span><span class="lang-es">rutas de ferry</span></td><td class="src">IMO MSC.1/Circ.1228 beam-sea guidance</td></tr><tr><td><b><span class="lang-en">Significant wave height (Hs)</span><span class="lang-es">Altura significativa del oleaje (Hs)</span></b></td><td class="lim"><span data-lim="1.8" data-kind="m">1.8</span></td><td class="lim"><span data-lim="2.5" data-kind="m">2.5</span></td><td><span class="lang-en">ferry routes</span><span class="lang-es">rutas de ferry</span>, <span class="lang-en">ports</span><span class="lang-es">puertos</span>, <span class="lang-en">anchorages</span><span class="lang-es">fondeaderos</span>, <span class="lang-en">inlets</span><span class="lang-es">entradas</span></td><td class="src">operator practice - VERIFY with the ferry operators<span class="verify">VERIFY</span></td></tr><tr><td><b><span class="lang-en">Roll resonance margin</span><span class="lang-es">Margen de resonancia de balance</span></b><div class="vnote"><span class="lang-en">|Te/Tr &minus; 1|, comparing the encounter period Te with the vessel's natural roll period Tr. <b>Zero is the dangerous end</b> &mdash; a match means synchronous rolling, so this limit is read in the opposite direction to every other row.</span><span class="lang-es">|Te/Tr &minus; 1|, comparando el periodo de encuentro Te con el periodo natural de balance Tr. <b>Cero es el extremo peligroso</b>: la coincidencia produce balance sincrónico, por lo que este límite se lee al revés que los demás.</span></div><div class="vnote"><i><span class="lang-en">lower is worse</span><span class="lang-es">menor es peor</span></i></div></td><td class="lim"><span data-lim="0.3" data-kind="-">0.3</span></td><td class="lim"><span data-lim="0.15" data-kind="-">0.15</span></td><td><span class="lang-en">ferry routes</span><span class="lang-es">rutas de ferry</span></td><td class="src">IMO MSC.1/Circ.1228 synchronous rolling</td></tr><tr><td colspan="5" style="background:var(--controls);font-weight:700"><span class="lang-en">Small craft</span><span class="lang-es">Embarcación pequeña</span></td></tr><tr><td><b><span class="lang-en">Wind gusts</span><span class="lang-es">Ráfagas de viento</span></b></td><td class="lim"><span data-lim="25.0" data-kind="kt">25.0</span></td><td class="lim"><span data-lim="33.0" data-kind="kt">33.0</span></td><td><span class="lang-en">all locations</span><span class="lang-es">todos los lugares</span></td><td class="src">NWS SCA upper bound; Beaufort 7 - VERIFY<span class="verify">VERIFY</span></td></tr><tr><td><b><span class="lang-en">Significant wave height (Hs)</span><span class="lang-es">Altura significativa del oleaje (Hs)</span></b></td><td class="lim"><span data-lim="1.5" data-kind="m">1.5</span></td><td class="lim"><span data-lim="2.0" data-kind="m">2.0</span></td><td><span class="lang-en">all locations</span><span class="lang-es">todos los lugares</span></td><td class="src">NWS SJU SCA seas 6 ft = 1.83 m - VERIFY<span class="verify">VERIFY</span></td></tr><tr><td><b><span class="lang-en">Significant wave height (Hs)</span><span class="lang-es">Altura significativa del oleaje (Hs)</span></b></td><td class="lim"><span data-lim="1.0" data-kind="m">1.0</span></td><td class="lim"><span data-lim="1.4" data-kind="m">1.4</span></td><td><span class="lang-en">inlets</span><span class="lang-es">entradas</span></td><td class="src">operator judgement - CARICOOS to confirm</td></tr><tr><td><b><span class="lang-en">Wave steepness</span><span class="lang-es">Escarpamiento del oleaje</span></b><div class="vnote"><span class="lang-en">S = Hs / (1.56 &middot; Tp&sup2;). Steepness, not height alone, is what makes a sea dangerous for a small boat: 1.5 m at 12 s is a comfortable swell, while 1.5 m at 5 s is a wall of breaking chop.</span><span class="lang-es">S = Hs / (1.56 &middot; Tp&sup2;). El escarpamiento, y no solo la altura, es lo que hace peligroso el mar para una embarcación pequeña: 1.5 m a 12 s es una marejada cómoda, mientras que 1.5 m a 5 s es una pared de rompientes.</span></div></td><td class="lim"><span data-lim="0.035" data-kind="-">0.035</span></td><td class="lim"><span data-lim="0.045" data-kind="-">0.045</span></td><td><span class="lang-en">all locations</span><span class="lang-es">todos los lugares</span></td><td class="src">WMO-No.702 Guide to Wave Analysis and Forecasting</td></tr><tr><td><b><span class="lang-en">Sustained wind</span><span class="lang-es">Viento sostenido</span></b></td><td class="lim"><span data-lim="18.0" data-kind="kt">18.0</span></td><td class="lim"><span data-lim="25.0" data-kind="kt">25.0</span></td><td><span class="lang-en">all locations</span><span class="lang-es">todos los lugares</span></td><td class="src">NWS SJU Small Craft Advisory band (sustained 20-33 kt) - VERIFY<span class="verify">VERIFY</span></td></tr><tr><td><b><span class="lang-en">Wind against current</span><span class="lang-es">Viento contra corriente</span></b><div class="vnote"><span class="lang-en">A CariCOOS-defined index, not a standard quantity: the wind speed scaled by how directly the current opposes it. It exists so &quot;wind against tide&quot; can be rated on the same scale as wind itself.</span><span class="lang-es">Un índice definido por CariCOOS, no una magnitud estándar: la velocidad del viento escalada por cuán directamente se le opone la corriente. Permite evaluar el &quot;viento contra corriente&quot; en la misma escala que el viento.</span></div></td><td class="lim"><span data-lim="8.0" data-kind="kt">8.0</span></td><td class="lim"><span data-lim="14.0" data-kind="kt">14.0</span></td><td><span class="lang-en">passages</span><span class="lang-es">canales</span>, <span class="lang-en">inlets</span><span class="lang-es">entradas</span></td><td class="src">seamanship practice - CARICOOS to confirm</td></tr><tr><td colspan="5" style="background:var(--controls);font-weight:700"><span class="lang-en">Recreational</span><span class="lang-es">Recreativa</span></td></tr><tr><td><b><span class="lang-en">Significant wave height (Hs)</span><span class="lang-es">Altura significativa del oleaje (Hs)</span></b></td><td class="lim"><span data-lim="1.0" data-kind="m">1.0</span></td><td class="lim"><span data-lim="1.5" data-kind="m">1.5</span></td><td><span class="lang-en">all locations</span><span class="lang-es">todos los lugares</span></td><td class="src">operator judgement; comfort threshold</td></tr><tr><td><b><span class="lang-en">Wave steepness</span><span class="lang-es">Escarpamiento del oleaje</span></b><div class="vnote"><span class="lang-en">S = Hs / (1.56 &middot; Tp&sup2;). Steepness, not height alone, is what makes a sea dangerous for a small boat: 1.5 m at 12 s is a comfortable swell, while 1.5 m at 5 s is a wall of breaking chop.</span><span class="lang-es">S = Hs / (1.56 &middot; Tp&sup2;). El escarpamiento, y no solo la altura, es lo que hace peligroso el mar para una embarcación pequeña: 1.5 m a 12 s es una marejada cómoda, mientras que 1.5 m a 5 s es una pared de rompientes.</span></div></td><td class="lim"><span data-lim="0.03" data-kind="-">0.03</span></td><td class="lim"><span data-lim="0.04" data-kind="-">0.04</span></td><td><span class="lang-en">all locations</span><span class="lang-es">todos los lugares</span></td><td class="src">WMO-No.702</td></tr><tr><td><b><span class="lang-en">Sustained wind</span><span class="lang-es">Viento sostenido</span></b></td><td class="lim"><span data-lim="15.0" data-kind="kt">15.0</span></td><td class="lim"><span data-lim="22.0" data-kind="kt">22.0</span></td><td><span class="lang-en">all locations</span><span class="lang-es">todos los lugares</span></td><td class="src">Beaufort 4 / 6; comfort not safety</td></tr></tbody>
+</table>
+<h3><span class="lang-en">How a rating is combined</span><span class="lang-es">Cómo se combina una evaluación</span></h3>
+<p class="lead"><span class="lang-en">Each applicable variable is rated on its own, and the site takes the <b>worst</b> of them. When two variables are equally bad, the one furthest past its limit is reported as the driver, so a sea that is both tall and steep is correctly described as steep. A variable with no data is skipped rather than assumed to pass, and a location with no usable data at all reads <i>No data</i> &mdash; never <i>Favorable</i>.</span><span class="lang-es">Cada variable aplicable se evalúa por separado y el lugar toma la <b>peor</b> de ellas. Cuando dos variables están igual de mal, se informa como causa la que más excede su límite, de modo que un mar alto y escarpado se describe correctamente como escarpado. Una variable sin datos se omite en vez de suponer que aprueba, y un lugar sin datos utilizables lee <i>Sin datos</i>, nunca <i>Favorable</i>.</span></p>
+<h3><span class="lang-en">Where the numbers come from</span><span class="lang-es">De dónde vienen los números</span></h3>
+<p class="lead"><span class="lang-en">Forecast conditions come from the National Weather Service San Juan Coastal Waters Forecast for each location's marine zone. Wave period and direction are published for roughly the first three days; beyond that, ratings use wind and sea height only. Observed buoy and wind-station data are added in the next release.</span><span class="lang-es">Las condiciones pronosticadas provienen del Pronóstico de Aguas Costeras del Servicio Nacional de Meteorología de San Juan para la zona marina de cada lugar. El periodo y la dirección del oleaje se publican aproximadamente para los primeros tres días; más allá, la evaluación usa solo viento y altura del oleaje. Los datos observados de boyas y estaciones de viento se añaden en la próxima versión.</span></p>
+
+<div class="disclaimer"><span class="lang-en"><b>NOT FOR NAVIGATION.</b> Operational Suitability is computed by CariCOOS from observations and forecast data using the published thresholds. It is <b>not</b> an official forecast, advisory or warning. Official marine products are issued solely by the National Weather Service and are reproduced here verbatim and unaltered. Always consult the NWS and exercise your own judgement as master of the vessel.</span><span class="lang-es"><b>NO APTO PARA LA NAVEGACIÓN.</b> La Idoneidad Operacional es calculada por CariCOOS a partir de observaciones y pronósticos usando los umbrales publicados. <b>No</b> es un pronóstico, aviso ni advertencia oficial. Los productos marinos oficiales los emite únicamente el Servicio Nacional de Meteorología (NWS) y aquí se reproducen literalmente y sin alterar. Consulte siempre al NWS y ejerza su propio criterio como capitán.</span></div>
+</main>
+<footer><span class="lang-en">Rendered directly from config/thresholds.tsv &middot; 16 thresholds, 7 still marked VERIFY.</span><span class="lang-es">Generado directamente desde config/thresholds.tsv &middot; 16 umbrales, 7 aún marcados VERIFY.</span></footer>
+<script>
+const UNITS={m:{metric:['m',v=>v],marine:['ft',v=>v/0.3048]},kt:{metric:['m/s',v=>v/1.9438444924406046],marine:['kt',v=>v]},cms:{metric:['cm/s',v=>v],marine:['kt',v=>v*0.0194384]},nm:{metric:['km',v=>v*1.852],marine:['nmi',v=>v]},degC:{metric:['\u00b0C',v=>v],marine:['\u00b0F',v=>v*9/5+32]},s:{metric:['s',v=>v],marine:['s',v=>v]},deg:{metric:['\u00b0',v=>v],marine:['\u00b0',v=>v]},'-':{metric:['',v=>v],marine:['',v=>v]}};
+const UKEY='maritime_units';
+let U='marine';try{U=localStorage.getItem(UKEY)||'marine';}catch(e){}
+function setUnits(u){U=u;try{localStorage.setItem(UKEY,u);}catch(e){}document.querySelectorAll('.unitbtn').forEach(b=>{b.textContent=U==='marine'?'kt/ft':'m/s\u00b7m';});if(typeof onUnits==='function')onUnits();}
+function cu(kind,v){return v==null?null:UNITS[kind||'-'][U][1](v);}
+function ul(kind){return UNITS[kind||'-'][U][0];}
+function fv(kind,v,dp){if(v==null)return '\u2013';const x=cu(kind,v);const d=dp==null?(Math.abs(x)>=100?0:(Math.abs(x)>=10?0:1)):dp;const u=ul(kind);return x.toFixed(d)+(u?'\u202f'+u:'');}
+document.querySelectorAll('.unitbtn').forEach(b=>{b.textContent=U==='marine'?'kt/ft':'m/s\u00b7m';b.onclick=()=>setUnits(U==='marine'?'metric':'marine');});
+
+
+const ZKEY='buoys_tz';
+let Z='UTC';try{Z=localStorage.getItem(ZKEY)||'UTC';}catch(e){}
+const TZOFF=()=>Z==='AST'?-4*3600:0;
+function fmtTZ(epoch,withY){const d=new Date((epoch+TZOFF())*1000).toISOString();return (withY?d.slice(0,10):d.slice(5,10))+' '+d.slice(11,16);}
+function tzShiftStr(s){ /* 'YYYY-MM-DD HH:MM' (UTC) -> same in the active zone; date-only strings untouched */
+  if(!s||s.length<16||Z==='UTC')return s;const t=Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10),+s.slice(11,13),+s.slice(14,16))/1000;return fmtTZ(t,true);}
+function tzLabel(){return Z==='AST'?'AST (UTC−4)':'UTC';}
+function setTZ(z){Z=z;try{localStorage.setItem(ZKEY,z);}catch(e){}
+  document.querySelectorAll('.tzbtn').forEach(b=>{b.textContent=Z;});if(typeof onTZ==='function')onTZ();}
+document.querySelectorAll('.tzbtn').forEach(b=>{b.textContent=Z;b.onclick=()=>setTZ(Z==='UTC'?'AST':'UTC');});
+
+/* ORDER MATTERS, and it bit us twice.
+   1. LANG_JS must come BEFORE the page script, because page scripts call render()
+      at load and render() reads L and T(), which LANG_JS declares with let/function.
+      Page script first => L is in its temporal dead zone => ReferenceError before a
+      single row is drawn, and the table just renders empty with nothing on screen
+      to say why.
+   2. The page's I18N dictionary must come BEFORE LANG_JS, because LANG_JS's
+      applyI18n() runs at load and guards with `typeof I18N !== 'undefined'`.
+      That guard is NOT safe here: typeof only tolerates *undeclared* names, and a
+      `const I18N` declared further down the same scope is declared-but-uninitialised,
+      so typeof throws too. Hence its own slot, emitted first. */
+
+
+const LKEY='buoys_lang';
+let L=document.documentElement.getAttribute('data-lang')||'en';
+function T(k){const d=(typeof I18N!=='undefined')&&I18N[k];return d?(d[L]||d.en||k):k;}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(e=>{const k=e.dataset.i18n;if(typeof I18N!=='undefined'&&I18N[k])e.innerHTML=T(k);});
+  document.querySelectorAll('[data-i18n-title]').forEach(e=>{e.title=T(e.dataset.i18nTitle);});
+  document.querySelectorAll('.langbtn').forEach(b=>{b.textContent=L==='es'?'English':'Español';});
+  document.title=T('title')==='title'?document.title:T('title');
+}
+const NOTE_ES=[["stale since","sin datos desde"],["redeploy pending","redespliegue pendiente"],["off station","fuera de estación"],["offline since","fuera de línea desde"],["retired","retirada"],["inactive","inactiva"]];
+function noteT(n){if(L!=='es'||!n)return n;for(const [a,b] of NOTE_ES)n=n.split(a).join(b);return n;}
+function setLang(l){L=l;try{localStorage.setItem(LKEY,l);}catch(e){}
+  document.documentElement.setAttribute('data-lang',l);document.documentElement.lang=l;
+  applyI18n();if(typeof onLang==='function')onLang();}
+document.querySelectorAll('.langbtn').forEach(b=>b.onclick=()=>setLang(L==='es'?'en':'es'));
+applyI18n();
+
+
+const LIMITS = {"small/wind_kt/*": {"marginal": 18.0, "unfavorable": 25.0, "unit": "kt"}, "small/gust_kt/*": {"marginal": 25.0, "unfavorable": 33.0, "unit": "kt"}, "small/hs_m/*": {"marginal": 1.5, "unfavorable": 2.0, "unit": "m"}, "small/steepness/*": {"marginal": 0.035, "unfavorable": 0.045, "unit": "-"}, "small/hs_m/inlet": {"marginal": 1.0, "unfavorable": 1.4, "unit": "m"}, "small/wind_vs_curr/passage,inlet": {"marginal": 8.0, "unfavorable": 14.0, "unit": "kt"}, "ferry/hs_beam_m/route": {"marginal": 1.2, "unfavorable": 1.8, "unit": "m"}, "ferry/roll_ratio/route": {"marginal": 0.3, "unfavorable": 0.15, "unit": "-"}, "ferry/gust_kt/route,port,anchorage,inlet": {"marginal": 28.0, "unfavorable": 35.0, "unit": "kt"}, "ferry/hs_m/route,port,anchorage,inlet": {"marginal": 1.8, "unfavorable": 2.5, "unit": "m"}, "ship/wind_kt/port,passage": {"marginal": 25.0, "unfavorable": 34.0, "unit": "kt"}, "ship/lp_swell_m/port,passage": {"marginal": 0.7, "unfavorable": 1.2, "unit": "m"}, "ship/hs_m/port,passage": {"marginal": 2.5, "unfavorable": 3.5, "unit": "m"}, "rec/wind_kt/*": {"marginal": 15.0, "unfavorable": 22.0, "unit": "kt"}, "rec/hs_m/*": {"marginal": 1.0, "unfavorable": 1.5, "unit": "m"}, "rec/steepness/*": {"marginal": 0.03, "unfavorable": 0.04, "unit": "-"}};
+function onUnits(){
+  document.querySelectorAll('[data-lim]').forEach(el=>{
+    const k=el.dataset.kind, v=parseFloat(el.dataset.lim);
+    el.textContent = (k==='-') ? v.toFixed(3) : fv(k,v,null);
+  });
+}
+function onLang(){}
+onUnits();
+
+</script>
+</body>
+</html>

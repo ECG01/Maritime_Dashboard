@@ -1,0 +1,19 @@
+# Published with the hub pages. The board regenerates every 10 minutes under the
+# same URLs, so a cached copy is a wrong go/no-go call.
+#
+# NOTE: dm2.caricoos.org serves static files through nginx, and the live Buoys
+# Hub returns NO Cache-Control header despite shipping this same file - so this
+# may well be inert there. The pages therefore also carry their own
+# <meta http-equiv="Cache-Control">. Verify after deploy with:
+#   curl -sI https://dm2.caricoos.org/Maritime_Dashboard/ | grep -i cache-control
+# and if the header is still missing, ask for an nginx location block.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|css|json)$">
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
+  </FilesMatch>
+</IfModule>
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType application/javascript "access plus 0 seconds"
+</IfModule>

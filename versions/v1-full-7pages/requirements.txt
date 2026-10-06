@@ -1,0 +1,8 @@
+# Phase 1 deliberately adds NO dependency beyond what the Ocean Buoys Hub already
+# installs, so the Maritime Dashboard can deploy to dm2 without touching the venv
+# that mesonet-ops owns. All HTTP goes through the standard library (urllib).
+# Phase 2 (SWAN .mat parsing) needs scipy + h5py and gets its own .mar_env.
+numpy
+pandas
+pyarrow
+netCDF4

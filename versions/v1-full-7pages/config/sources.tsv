@@ -1,0 +1,47 @@
+# Observation-station registry: every place a number on the board can come from.
+# Buoy rows match Ocean_Buoys_HUB/config/buoys.tsv; mesonet and tide rows are lifted
+# from the Model Viewer V2 ETL (etl/etl/mesonet_config.py, noaa_waterlevel_config.py),
+# where they were already confirmed live.
+#
+# src_id     id used in sites.tsv obs_* columns
+# provider   caricoos_buoy 	 cdip 	 caricoos_mesonet 	 ndbc 	 coops
+# vars       canonical columns this source can supply
+# endpoint   path/id fragment; the fetcher composes the full URL from machine.env
+# cadence_min native sampling interval
+# max_age_h  older than this = stale; the site falls through to the next source
+# link       where a mariner can go to see this source's own page
+# notes      free text; stale/offline/retired marks the source down
+src_id	provider	kind	active	lat	lon	name_en	name_es	vars	endpoint	cadence_min	max_age_h	link	notes
+PR1	caricoos_buoy	wave,ocean,current	1	17.8628	-66.5212	Ponce buoy	Boya de Ponce	hs,tp,dp,wtemp,cs,cd	UMAINE_buoys_newFormat/PR1	60	6	../Buoys_Dashboard/	NDBC 42085, CariCOOS Data Buoy A
+PR2	caricoos_buoy	wave,ocean,current	1	18.4758	-66.0995	San Juan buoy	Boya de San Juan	hs,tp,dp,wtemp,cs,cd	UMAINE_buoys_newFormat/PR2	60	6	../Buoys_Dashboard/	NDBC 41053, Data Buoy B
+PR3	caricoos_buoy	wave,ocean,current	1	18.2610	-65.4641	Vieques buoy	Boya de Vieques	hs,tp,dp,wtemp,cs,cd	UMAINE_buoys_newFormat/PR3	60	6	../Buoys_Dashboard/	NDBC 41056, Data Buoy E, Vieques Sound
+VI1	caricoos_buoy	wave,ocean	1	18.2492	-64.7632	St. John buoy	Boya de St. John	hs,tp,dp,wtemp	UMAINE_buoys_newFormat/VI1	60	6	../Buoys_Dashboard/	NDBC 41052. stale since 2026-07, redeploy pending
+CDIP181	cdip	wave	1	18.3764	-67.2797	Rincon Waverider	Waverider de Rincon	hs,tp,dp,wtemp	Rincon_wave/181p1_rt.nc	30	3	../Buoys_Dashboard/	Datawell DWR, CDIP station 181
+CDIP249	cdip	wave	1	18.4900	-66.7000	Arecibo Waverider	Waverider de Arecibo	hs,tp,dp,wtemp	Arecibo_wave/249p1_rt.nc	30	3	../Buoys_Dashboard/	Datawell DWR, CDIP station 249
+XSNF	caricoos_mesonet	wind	1	18.4300	-66.1000	San Juan Port	Puerto de San Juan	wspd,wdir,gust,atemp,pres	Mesonet/XSNF/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XJUA	caricoos_mesonet	wind	1	18.4570	-66.1180	San Juan NavAid	Baliza de San Juan	wspd,wdir,gust,atemp,pres	Mesonet/XJUA/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XREY	caricoos_mesonet	wind	1	18.2900	-65.6330	Del Rey Marina	Marina Del Rey	wspd,wdir,gust,atemp,pres	Mesonet/XREY/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XCUL	caricoos_mesonet	wind	1	18.3130	-65.2280	Isla Culebrita	Isla Culebrita	wspd,wdir,gust,atemp,pres	Mesonet/XCUL/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XIMG	caricoos_mesonet	wind	1	17.9700	-67.0460	Isla Magueyes	Isla Magueyes	wspd,wdir,gust,atemp,pres	Mesonet/XIMG/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XMRS	caricoos_mesonet	wind	1	17.9300	-66.1600	Las Mareas	Las Mareas	wspd,wdir,gust,atemp,pres	Mesonet/XMRS/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XCDP	caricoos_mesonet	wind	1	18.0900	-67.1900	Club Deportivo del Oeste	Club Deportivo del Oeste	wspd,wdir,gust,atemp,pres	Mesonet/XCDP/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XAGU	caricoos_mesonet	wind	1	18.4560	-67.1640	Aguadilla	Aguadilla	wspd,wdir,gust,atemp,pres	Mesonet/XAGU/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XCRL	caricoos_mesonet	wind	1	17.9330	-67.1900	Cabo Rojo Lighthouse	Faro de Cabo Rojo	wspd,wdir,gust,atemp,pres	Mesonet/XCRL/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XAMA	caricoos_mesonet	wind	1	18.3400	-64.9300	Charlotte Amalie Harbor	Puerto de Charlotte Amalie	wspd,wdir,gust,atemp,pres	Mesonet/XAMA/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XRUP	caricoos_mesonet	wind	1	18.3390	-64.9700	Rupert Rock	Rupert Rock	wspd,wdir,gust,atemp,pres	Mesonet/XRUP/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XWTR	caricoos_mesonet	wind	1	18.3200	-64.9550	Water Island	Cayo Aguada	wspd,wdir,gust,atemp,pres	Mesonet/XWTR/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XCRX	caricoos_mesonet	wind	1	17.6820	-64.9020	Sandy Point NWR	Refugio Sandy Point	wspd,wdir,gust,atemp,pres	Mesonet/XCRX/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+XBUK	caricoos_mesonet	wind	1	17.7900	-64.6200	Buck Island	Cayo Buck	wspd,wdir,gust,atemp,pres	Mesonet/XBUK/Met/HistoricRealtime/Agg.ncml	5	3	../Mesonet_Dashboard/	
+41043	ndbc	wave,wind	1	21.1320	-64.8560	NE Puerto Rico offshore	Al NE de PR mar afuera	hs,tp,dp,wspd	41043	60	6	https://www.ndbc.noaa.gov/station_page.php?station=41043	UPSTREAM SWELL SENTINEL: sees N/NE groundswell 12-24 h before it lands
+41044	ndbc	wave,wind	1	21.5800	-58.6300	NE of Antilles	Al NE de las Antillas	hs,tp,dp,wspd	41044	60	6	https://www.ndbc.noaa.gov/station_page.php?station=41044	UPSTREAM SWELL SENTINEL
+9755371	coops	tide	1	18.4589	-66.1164	San Juan, La Puntilla	San Juan, La Puntilla	wl,wl_pred	9755371	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9755371	MLLW datum
+9757811	coops	tide	1	18.4805	-66.7024	Arecibo	Arecibo	wl,wl_pred	9757811	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9757811	
+9753216	coops	tide	1	18.3353	-65.6311	Fajardo	Fajardo	wl,wl_pred	9753216	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9753216	
+9752621	coops	tide	1	18.1525	-65.4438	Isabel Segunda, Vieques	Isabel Segunda, Vieques	wl,wl_pred	9752621	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9752621	
+9752235	coops	tide	1	18.3009	-65.3025	Culebra	Culebra	wl,wl_pred	9752235	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9752235	
+9758066	coops	tide	1	18.0059	-66.7666	Guayanilla	Guayanilla	wl,wl_pred	9758066	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9758066	nearest gauge to Ponce; Ponce itself has no CO-OPS station
+9755968	coops	tide	1	17.9491	-66.2259	Salinas, Bahia de Jobos	Salinas, Bahia de Jobos	wl,wl_pred	9755968	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9755968	
+9759394	coops	tide	1	18.2188	-67.1624	Mayaguez	Mayaguez	wl,wl_pred	9759394	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9759394	
+9751639	coops	tide	1	18.3306	-64.9258	Charlotte Amalie	Charlotte Amalie	wl,wl_pred	9751639	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9751639	
+9751381	coops	tide	1	18.3183	-64.7242	Lameshur Bay, St. John	Bahia Lameshur, St. John	wl,wl_pred	9751381	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9751381	nearest gauge to Cruz Bay
+9751364	coops	tide	1	17.7477	-64.6984	Christiansted Harbor	Puerto de Christiansted	wl,wl_pred	9751364	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9751364	

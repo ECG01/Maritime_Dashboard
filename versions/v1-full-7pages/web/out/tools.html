@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<title>Tools &middot; CariCOOS Maritime</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+
+<style>:root{color-scheme:light;
+  --surface:#d9e5ed; --panel:#f1f6f9; --ink:#122a3a; --ink2:#51677a; --grid:#dbe6ec;
+  --line:#c0d2dc; --s1:#2a78d6; --s2:#eb6834; --tip-bg:#f1f6f9; --tip-edge:#a9bfcc;
+  --btn:#dfeaf1; --btn-on:#0b3a5c; --btn-on-ink:#ffffff; --sel:rgba(0,150,180,.15);
+  --navy:#0b3a5c; --navy-ink:#ffffff; --navy-sub:#9fc3d9; --teal:#0096b4;
+  --controls:#e7f0f5; --flag:#c0392b; --flag2:#7c3aed; --ok:#1e8e5a;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){color-scheme:dark;
+    --surface:#101c26; --panel:#162733; --ink:#e8eef3; --ink2:#9db2c2; --grid:#25384633;
+    --line:#2b4152; --s1:#3987e5; --s2:#d95926; --tip-bg:#1c2e3c; --tip-edge:#3c566a;
+    --btn:#1c2e3c; --btn-on:#3ba7c4; --btn-on-ink:#08131b; --sel:rgba(59,167,196,.25);
+    --navy:#092c46; --navy-ink:#e8eef3; --navy-sub:#7fa6bf; --teal:#3ba7c4;
+    --controls:#14232e; --flag:#ff6f61; --flag2:#b794f6; --ok:#4cc38a;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --surface:#101c26; --panel:#162733; --ink:#e8eef3; --ink2:#9db2c2; --grid:#25384633;
+  --line:#2b4152; --s1:#3987e5; --s2:#d95926; --tip-bg:#1c2e3c; --tip-edge:#3c566a;
+  --btn:#1c2e3c; --btn-on:#3ba7c4; --btn-on-ink:#08131b; --sel:rgba(59,167,196,.25);
+  --navy:#092c46; --navy-ink:#e8eef3; --navy-sub:#7fa6bf; --teal:#3ba7c4;
+  --controls:#14232e; --flag:#ff6f61; --flag2:#b794f6; --ok:#4cc38a;}
+html[data-lang="es"] .lang-en{display:none !important}
+html:not([data-lang="es"]) .lang-es{display:none !important}
+.langbtn{font:600 .78rem "Archivo",sans-serif; letter-spacing:.06em; border:1px solid rgba(255,255,255,.45);
+  background:transparent; color:var(--navy-ink,#fff); padding:.22rem .7rem; border-radius:999px; cursor:pointer}
+.langbtn:hover{background:rgba(255,255,255,.12)}
+
+:root{--warn:#c77700; --warn-ink:#ffffff; --nodata:#8496a4;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --warn:#e09b2d; --warn-ink:#1a1206; --nodata:#6d8291;}}
+:root[data-theme="dark"]{--warn:#e09b2d; --warn-ink:#1a1206; --nodata:#6d8291;}
+
+.chip{display:inline-flex;align-items:center;gap:.36em;font:600 .82rem "Source Sans 3",sans-serif;
+  padding:.16rem .55rem;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.chip .g{font-size:.9em;line-height:1}
+.chip.favorable{background:var(--ok);color:#fff}
+.chip.marginal{background:var(--warn);color:var(--warn-ink)}
+.chip.unfavorable{background:var(--flag);color:#fff}
+.chip.nodata{background:var(--btn);color:var(--ink2);border-color:var(--line)}
+.chip.notrated{background:transparent;color:var(--ink2);border-color:var(--line);border-style:dashed}
+
+.cell{display:flex;align-items:center;justify-content:center;min-height:1.6rem;
+  border-radius:3px;font:600 .7rem "Source Sans 3",sans-serif}
+.cell.favorable{background:var(--ok);color:#fff}
+.cell.marginal{background:var(--warn);color:var(--warn-ink)}
+.cell.unfavorable{background:var(--flag);color:#fff}
+.cell.nodata{background:var(--btn);color:var(--ink2);border:1px dashed var(--line)}
+.cell.notrated{background:transparent;color:var(--ink2);border:1px dotted var(--line)}
+
+/* NWS products sit in their own panel, visually distinct from anything we compute */
+.nws{border:2px solid var(--s2);border-radius:8px;background:var(--panel);padding:.85rem 1rem;margin:1rem 0}
+.nws h3{margin:0 0 .4rem;font:700 .95rem "Archivo",sans-serif;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--s2)}
+.nws .prod{margin:.5rem 0;padding-left:.7rem;border-left:3px solid var(--s2)}
+.nws .prod b{font:700 .95rem "Source Sans 3",sans-serif}
+.nws .meta{font:400 .8rem "Source Sans 3",sans-serif;color:var(--ink2)}
+.nws pre{white-space:pre-wrap;font:400 .82rem "JetBrains Mono",monospace;margin:.4rem 0 0}
+.nws .attrib{font:400 .78rem "Source Sans 3",sans-serif;color:var(--ink2);margin-top:.5rem}
+
+.disclaimer{border-top:1px solid var(--line);margin-top:1.6rem;padding-top:.8rem;
+  font:400 .82rem "Source Sans 3",sans-serif;color:var(--ink2)}
+.disclaimer b{color:var(--flag)}
+.agebadge{font:600 .72rem "Source Sans 3",sans-serif;padding:.05rem .4rem;border-radius:3px;
+  background:var(--btn);color:var(--ink2)}
+.agebadge.stale{background:var(--flag);color:#fff}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:.4rem .9rem;
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:.7rem .9rem;margin:.2rem 0 1rem}
+.legend .lg{display:flex;align-items:baseline;gap:.5rem}
+.legend .lgt{font-size:.86rem;color:var(--ink2);line-height:1.35}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);color:var(--ink);
+  font:400 1rem/1.5 "Source Sans 3",system-ui,sans-serif}
+header{background:var(--navy);color:var(--navy-ink)}
+.hwrap{max-width:1180px;margin:0 auto;padding:.9rem 1rem}
+.brandrow{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+h1{margin:.2rem 0 0;font:700 1.5rem "Archivo",sans-serif;letter-spacing:.01em}
+.sub{color:var(--navy-sub);font-size:.92rem;margin-top:.15rem}
+.ctrls{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.unitbtn,.tzbtn,.langbtn{font:600 .78rem "Archivo",sans-serif;letter-spacing:.06em;
+  border:1px solid rgba(255,255,255,.45);background:transparent;color:var(--navy-ink);
+  padding:.22rem .7rem;border-radius:999px;cursor:pointer}
+.unitbtn:hover,.tzbtn:hover{background:rgba(255,255,255,.12)}
+nav.tabs{background:var(--navy);border-top:1px solid rgba(255,255,255,.14)}
+nav.tabs .hwrap{padding:0 1rem;display:flex;gap:.2rem;overflow-x:auto}
+nav.tabs a{color:var(--navy-sub);text-decoration:none;padding:.55rem .8rem;white-space:nowrap;
+  font:600 .88rem "Source Sans 3",sans-serif;border-bottom:3px solid transparent}
+nav.tabs a:hover{color:var(--navy-ink)}
+nav.tabs a[aria-current="page"]{color:var(--navy-ink);border-bottom-color:var(--teal)}
+main{max-width:1180px;margin:0 auto;padding:1.2rem 1rem 2.5rem}
+h2{font:700 1.15rem "Archivo",sans-serif;margin:1.6rem 0 .6rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:1rem}
+footer{max-width:1180px;margin:0 auto;padding:0 1rem 2rem;color:var(--ink2);font-size:.85rem}
+a{color:var(--s1)}
+@media (max-width:720px){h1{font-size:1.25rem}.hwrap{padding:.7rem .8rem}main{padding:.9rem .8rem 2rem}}
+
+.tool{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  margin-bottom:1.4rem;overflow:hidden}
+.tool .head{padding:.9rem 1rem .8rem}
+.tool h3{margin:0;font:700 1.1rem "Archivo",sans-serif}
+.tool .what{margin:.35rem 0 .2rem;max-width:66ch}
+.tool .when{margin:.2rem 0 0;color:var(--ink2);font-size:.92rem;max-width:66ch}
+.tool .bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+  padding:.6rem 1rem;background:var(--controls);border-top:1px solid var(--line)}
+.btn{font:600 .85rem "Source Sans 3",sans-serif;border:1px solid var(--line);
+  background:var(--btn);color:var(--ink);padding:.35rem .8rem;border-radius:5px;
+  cursor:pointer;text-decoration:none;display:inline-block}
+.btn:hover{background:var(--sel)}
+.btn.primary{background:var(--btn-on);color:var(--btn-on-ink);border-color:var(--btn-on)}
+.frame{display:none}
+.frame.on{display:block}
+.frame iframe{display:block;width:100%;height:600px;border:0;background:var(--surface)}
+.hint{font-size:.85rem;color:var(--ink2)}
+.lead{max-width:64ch}
+@media (max-width:720px){.frame iframe{height:420px}}
+</style>
+</head>
+<body>
+<script>(function(){var l='en';try{l=localStorage.getItem('buoys_lang')||((navigator.language||'').toLowerCase().indexOf('es')===0?'es':'en');}catch(e){}document.documentElement.setAttribute('data-lang',l);document.documentElement.lang=l;})();</script>
+<header><div class="hwrap">
+  <div class="brandrow">
+    <div style="display:flex;align-items:center;gap:.6rem"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M1.6 13.2c2.1 0 2.1 1.6 4.2 1.6s2.1-1.6 4.2-1.6 2.1 1.6 4.2 1.6 2.1-1.6 4.2-1.6 2.1 1.6 4.2 1.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 3.2v7.2M9.2 5.6h5.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div><h1><span class="lang-en">Tools</span><span class="lang-es">Herramientas</span></h1>
+      <div class="sub"><span class="lang-en">The CARICOOS tools behind this board</span><span class="lang-es">Las herramientas de CARICOOS tras este tablero</span></div></div></div>
+    <div class="ctrls"><button class="unitbtn" type="button" title="knots &amp; feet / metric">kt/ft</button><button class="tzbtn" type="button" title="UTC / AST (UTC−4)">UTC</button><button class="langbtn" type="button" title="English / Español">Español</button></div>
+  </div>
+</div></header>
+<nav class="tabs"><div class="hwrap"><a href="index.html"><span class="lang-en">Overview</span><span class="lang-es">Resumen</span></a><a href="conditions_now.html"><span class="lang-en">Conditions now</span><span class="lang-es">Condiciones ahora</span></a><a href="planner.html"><span class="lang-en">Planner</span><span class="lang-es">Planificador</span></a><a href="marine_zones.html"><span class="lang-en">NWS marine zones</span><span class="lang-es">Zonas marinas NWS</span></a><a href="tools.html" aria-current="page"><span class="lang-en">Tools</span><span class="lang-es">Herramientas</span></a><a href="methods.html"><span class="lang-en">Methods</span><span class="lang-es">Métodos</span></a><a href="status.html"><span class="lang-en">Data status</span><span class="lang-es">Estado de datos</span></a></div></nav>
+<main>
+<p class="lead"><span class="lang-en">These are the four CARICOOS tools this dashboard draws on. Each one can be shown inline here, or opened full screen in its own tab &mdash; which is usually better if you want to zoom around a map or keep a link. Nothing loads until you ask for it.</span><span class="lang-es">Estas son las cuatro herramientas de CARICOOS en las que se apoya este tablero. Cada una puede mostrarse aquí mismo o abrirse a pantalla completa en su propia pestaña, lo cual suele ser mejor si quiere moverse por un mapa o guardar un enlace. Nada se carga hasta que usted lo pida.</span></p>
+<div class="tool">
+  <div class="head">
+    <h3><span class="lang-en">Ocean Buoys Hub</span><span class="lang-es">Centro de Boyas Oceánicas</span></h3>
+    <p class="what"><span class="lang-en">Wave height, period and direction, water temperature, salinity and currents from the CariCOOS data buoys and Waveriders, back to 2009.</span><span class="lang-es">Altura, periodo y dirección del oleaje, temperatura del agua, salinidad y corrientes de las boyas de datos y Waveriders de CariCOOS, desde 2009.</span></p>
+    <p class="when"><span class="lang-en">Use it when you want to check what the sea is <i>actually</i> doing right now at a specific buoy, or to see how today compares with the record.</span><span class="lang-es">Úselo para comprobar qué está haciendo <i>realmente</i> el mar ahora en una boya concreta, o para comparar el día de hoy con el histórico.</span></p>
+  </div>
+  <div class="bar">
+    <button class="btn primary" data-load="buoys" data-url="../Buoys_Dashboard/"
+            data-title="Ocean Buoys Hub"><span class="lang-en">Show here</span><span class="lang-es">Mostrar aquí</span></button>
+    <a class="btn" href="../Buoys_Dashboard/" target="_blank" rel="noopener"><span class="lang-en">Open in new tab</span><span class="lang-es">Abrir en pestaña nueva</span> &#8599;</a>
+    <span class="hint"><span class="lang-en">Part of this site; opens full screen with its own address bar and back button.</span><span class="lang-es">Forma parte de este sitio; se abre a pantalla completa con su propia barra de direcciones y botón atrás.</span></span>
+  </div>
+  <div class="frame" id="f_buoys"></div>
+</div>
+<div class="tool">
+  <div class="head">
+    <h3><span class="lang-en">Wind Stations Hub</span><span class="lang-es">Centro de Estaciones de Viento</span></h3>
+    <p class="what"><span class="lang-en">Quality-controlled wind speed, direction and gusts from 37 stations across Puerto Rico and the U.S. Virgin Islands, plus temperature and pressure.</span><span class="lang-es">Velocidad, dirección y ráfagas de viento con control de calidad de 37 estaciones en Puerto Rico y las Islas Vírgenes, más temperatura y presión.</span></p>
+    <p class="when"><span class="lang-en">Use it when wind is the deciding factor &mdash; a lee shore, a gusty channel, or a berthing window.</span><span class="lang-es">Úselo cuando el viento sea el factor decisivo: una costa de sotavento, un canal racheado o una ventana de atraque.</span></p>
+  </div>
+  <div class="bar">
+    <button class="btn primary" data-load="mesonet" data-url="../Mesonet_Dashboard/"
+            data-title="Wind Stations Hub"><span class="lang-en">Show here</span><span class="lang-es">Mostrar aquí</span></button>
+    <a class="btn" href="../Mesonet_Dashboard/" target="_blank" rel="noopener"><span class="lang-en">Open in new tab</span><span class="lang-es">Abrir en pestaña nueva</span> &#8599;</a>
+    <span class="hint"><span class="lang-en">Part of this site; opens full screen with its own address bar and back button.</span><span class="lang-es">Forma parte de este sitio; se abre a pantalla completa con su propia barra de direcciones y botón atrás.</span></span>
+  </div>
+  <div class="frame" id="f_mesonet"></div>
+</div>
+<div class="tool">
+  <div class="head">
+    <h3><span class="lang-en">Model Viewer</span><span class="lang-es">Visor de Modelos</span></h3>
+    <p class="what"><span class="lang-en">Interactive map of the forecast models &mdash; winds, waves, currents, water level, radar and satellite &mdash; over Puerto Rico and the U.S. Virgin Islands.</span><span class="lang-es">Mapa interactivo de los modelos de pronóstico: vientos, oleaje, corrientes, nivel del mar, radar y satélite sobre Puerto Rico y las Islas Vírgenes.</span></p>
+    <p class="when"><span class="lang-en">Use it to see the <i>pattern</i>: where a swell is coming from, how a front is moving, or what the current is doing across a passage.</span><span class="lang-es">Úselo para ver el <i>patrón</i>: de dónde viene una marejada, cómo se mueve un frente o qué hace la corriente en un canal.</span></p>
+  </div>
+  <div class="bar">
+    <button class="btn primary" data-load="modviewer" data-url="https://modviewer.caricoos.org/"
+            data-title="Model Viewer"><span class="lang-en">Show here</span><span class="lang-es">Mostrar aquí</span></button>
+    <a class="btn" href="https://modviewer.caricoos.org/" target="_blank" rel="noopener"><span class="lang-en">Open in new tab</span><span class="lang-es">Abrir en pestaña nueva</span> &#8599;</a>
+    <span class="hint"><span class="lang-en">Opens full screen with its own address bar and back button.</span><span class="lang-es">Se abre a pantalla completa con su propia barra de direcciones y botón atrás.</span></span>
+  </div>
+  <div class="frame" id="f_modviewer"></div>
+</div>
+<div class="tool">
+  <div class="head">
+    <h3><span class="lang-en">Model Viewer (classic)</span><span class="lang-es">Visor de Modelos (clásico)</span></h3>
+    <p class="what"><span class="lang-en">The original model dashboard: animated WRF, SWAN, FVCOM, RTOFS and STOFS forecast imagery.</span><span class="lang-es">El tablero de modelos original: animaciones de los pronósticos WRF, SWAN, FVCOM, RTOFS y STOFS.</span></p>
+    <p class="when"><span class="lang-en">Use it for a quick animated loop of a single model, or when you want the familiar view.</span><span class="lang-es">Úselo para un lazo animado rápido de un solo modelo, o cuando prefiera la vista de siempre.</span></p>
+  </div>
+  <div class="bar">
+    <button class="btn primary" data-load="classic" data-url="../Model_Viewer_v1/"
+            data-title="Model Viewer (classic)"><span class="lang-en">Show here</span><span class="lang-es">Mostrar aquí</span></button>
+    <a class="btn" href="../Model_Viewer_v1/" target="_blank" rel="noopener"><span class="lang-en">Open in new tab</span><span class="lang-es">Abrir en pestaña nueva</span> &#8599;</a>
+    <span class="hint"><span class="lang-en">Part of this site; opens full screen with its own address bar and back button.</span><span class="lang-es">Forma parte de este sitio; se abre a pantalla completa con su propia barra de direcciones y botón atrás.</span></span>
+  </div>
+  <div class="frame" id="f_classic"></div>
+</div>
+<div class="disclaimer"><span class="lang-en"><b>NOT FOR NAVIGATION.</b> Operational Suitability is computed by CariCOOS from observations and forecast data using the published thresholds. It is <b>not</b> an official forecast, advisory or warning. Official marine products are issued solely by the National Weather Service and are reproduced here verbatim and unaltered. Always consult the NWS and exercise your own judgement as master of the vessel.</span><span class="lang-es"><b>NO APTO PARA LA NAVEGACIÓN.</b> La Idoneidad Operacional es calculada por CariCOOS a partir de observaciones y pronósticos usando los umbrales publicados. <b>No</b> es un pronóstico, aviso ni advertencia oficial. Los productos marinos oficiales los emite únicamente el Servicio Nacional de Meteorología (NWS) y aquí se reproducen literalmente y sin alterar. Consulte siempre al NWS y ejerza su propio criterio como capitán.</span></div>
+</main>
+<footer><span class="lang-en">The tools above are maintained separately; this page only links and frames them.</span><span class="lang-es">Las herramientas anteriores se mantienen por separado; esta página solo las enlaza y las enmarca.</span></footer>
+<script>
+const UNITS={m:{metric:['m',v=>v],marine:['ft',v=>v/0.3048]},kt:{metric:['m/s',v=>v/1.9438444924406046],marine:['kt',v=>v]},cms:{metric:['cm/s',v=>v],marine:['kt',v=>v*0.0194384]},nm:{metric:['km',v=>v*1.852],marine:['nmi',v=>v]},degC:{metric:['\u00b0C',v=>v],marine:['\u00b0F',v=>v*9/5+32]},s:{metric:['s',v=>v],marine:['s',v=>v]},deg:{metric:['\u00b0',v=>v],marine:['\u00b0',v=>v]},'-':{metric:['',v=>v],marine:['',v=>v]}};
+const UKEY='maritime_units';
+let U='marine';try{U=localStorage.getItem(UKEY)||'marine';}catch(e){}
+function setUnits(u){U=u;try{localStorage.setItem(UKEY,u);}catch(e){}document.querySelectorAll('.unitbtn').forEach(b=>{b.textContent=U==='marine'?'kt/ft':'m/s\u00b7m';});if(typeof onUnits==='function')onUnits();}
+function cu(kind,v){return v==null?null:UNITS[kind||'-'][U][1](v);}
+function ul(kind){return UNITS[kind||'-'][U][0];}
+function fv(kind,v,dp){if(v==null)return '\u2013';const x=cu(kind,v);const d=dp==null?(Math.abs(x)>=100?0:(Math.abs(x)>=10?0:1)):dp;const u=ul(kind);return x.toFixed(d)+(u?'\u202f'+u:'');}
+document.querySelectorAll('.unitbtn').forEach(b=>{b.textContent=U==='marine'?'kt/ft':'m/s\u00b7m';b.onclick=()=>setUnits(U==='marine'?'metric':'marine');});
+
+
+const ZKEY='buoys_tz';
+let Z='UTC';try{Z=localStorage.getItem(ZKEY)||'UTC';}catch(e){}
+const TZOFF=()=>Z==='AST'?-4*3600:0;
+function fmtTZ(epoch,withY){const d=new Date((epoch+TZOFF())*1000).toISOString();return (withY?d.slice(0,10):d.slice(5,10))+' '+d.slice(11,16);}
+function tzShiftStr(s){ /* 'YYYY-MM-DD HH:MM' (UTC) -> same in the active zone; date-only strings untouched */
+  if(!s||s.length<16||Z==='UTC')return s;const t=Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10),+s.slice(11,13),+s.slice(14,16))/1000;return fmtTZ(t,true);}
+function tzLabel(){return Z==='AST'?'AST (UTC−4)':'UTC';}
+function setTZ(z){Z=z;try{localStorage.setItem(ZKEY,z);}catch(e){}
+  document.querySelectorAll('.tzbtn').forEach(b=>{b.textContent=Z;});if(typeof onTZ==='function')onTZ();}
+document.querySelectorAll('.tzbtn').forEach(b=>{b.textContent=Z;b.onclick=()=>setTZ(Z==='UTC'?'AST':'UTC');});
+
+/* ORDER MATTERS, and it bit us twice.
+   1. LANG_JS must come BEFORE the page script, because page scripts call render()
+      at load and render() reads L and T(), which LANG_JS declares with let/function.
+      Page script first => L is in its temporal dead zone => ReferenceError before a
+      single row is drawn, and the table just renders empty with nothing on screen
+      to say why.
+   2. The page's I18N dictionary must come BEFORE LANG_JS, because LANG_JS's
+      applyI18n() runs at load and guards with `typeof I18N !== 'undefined'`.
+      That guard is NOT safe here: typeof only tolerates *undeclared* names, and a
+      `const I18N` declared further down the same scope is declared-but-uninitialised,
+      so typeof throws too. Hence its own slot, emitted first. */
+const I18N={load:{en:"Show here",es:"Mostrar aquí"},hide:{en:"Hide",es:"Ocultar"}};
+
+const LKEY='buoys_lang';
+let L=document.documentElement.getAttribute('data-lang')||'en';
+function T(k){const d=(typeof I18N!=='undefined')&&I18N[k];return d?(d[L]||d.en||k):k;}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(e=>{const k=e.dataset.i18n;if(typeof I18N!=='undefined'&&I18N[k])e.innerHTML=T(k);});
+  document.querySelectorAll('[data-i18n-title]').forEach(e=>{e.title=T(e.dataset.i18nTitle);});
+  document.querySelectorAll('.langbtn').forEach(b=>{b.textContent=L==='es'?'English':'Español';});
+  document.title=T('title')==='title'?document.title:T('title');
+}
+const NOTE_ES=[["stale since","sin datos desde"],["redeploy pending","redespliegue pendiente"],["off station","fuera de estación"],["offline since","fuera de línea desde"],["retired","retirada"],["inactive","inactiva"]];
+function noteT(n){if(L!=='es'||!n)return n;for(const [a,b] of NOTE_ES)n=n.split(a).join(b);return n;}
+function setLang(l){L=l;try{localStorage.setItem(LKEY,l);}catch(e){}
+  document.documentElement.setAttribute('data-lang',l);document.documentElement.lang=l;
+  applyI18n();if(typeof onLang==='function')onLang();}
+document.querySelectorAll('.langbtn').forEach(b=>b.onclick=()=>setLang(L==='es'?'en':'es'));
+applyI18n();
+
+
+document.addEventListener('click',function(ev){
+  const b=ev.target.closest('[data-load]'); if(!b)return;
+  const k=b.dataset.load;
+  const box=document.getElementById('f_'+k);
+  if(!box.querySelector('iframe')){
+    const f=document.createElement('iframe');
+    f.src=b.dataset.url; f.loading='lazy'; f.title=b.dataset.title;
+    f.referrerPolicy='no-referrer-when-downgrade';
+    f.setAttribute('sandbox','allow-scripts allow-same-origin allow-popups allow-forms');
+    box.appendChild(f);
+  }
+  box.classList.toggle('on');
+  b.textContent = box.classList.contains('on') ? T('hide') : T('load');
+});
+function onLang(){
+  document.querySelectorAll('[data-load]').forEach(b=>{
+    const box=document.getElementById('f_'+b.dataset.load);
+    b.textContent = box.classList.contains('on') ? T('hide') : T('load');
+  });
+}
+
+</script>
+</body>
+</html>

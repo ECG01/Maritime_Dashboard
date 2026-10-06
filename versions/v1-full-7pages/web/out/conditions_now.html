@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<title>Conditions now &middot; CariCOOS Maritime</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+
+<style>:root{color-scheme:light;
+  --surface:#d9e5ed; --panel:#f1f6f9; --ink:#122a3a; --ink2:#51677a; --grid:#dbe6ec;
+  --line:#c0d2dc; --s1:#2a78d6; --s2:#eb6834; --tip-bg:#f1f6f9; --tip-edge:#a9bfcc;
+  --btn:#dfeaf1; --btn-on:#0b3a5c; --btn-on-ink:#ffffff; --sel:rgba(0,150,180,.15);
+  --navy:#0b3a5c; --navy-ink:#ffffff; --navy-sub:#9fc3d9; --teal:#0096b4;
+  --controls:#e7f0f5; --flag:#c0392b; --flag2:#7c3aed; --ok:#1e8e5a;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){color-scheme:dark;
+    --surface:#101c26; --panel:#162733; --ink:#e8eef3; --ink2:#9db2c2; --grid:#25384633;
+    --line:#2b4152; --s1:#3987e5; --s2:#d95926; --tip-bg:#1c2e3c; --tip-edge:#3c566a;
+    --btn:#1c2e3c; --btn-on:#3ba7c4; --btn-on-ink:#08131b; --sel:rgba(59,167,196,.25);
+    --navy:#092c46; --navy-ink:#e8eef3; --navy-sub:#7fa6bf; --teal:#3ba7c4;
+    --controls:#14232e; --flag:#ff6f61; --flag2:#b794f6; --ok:#4cc38a;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --surface:#101c26; --panel:#162733; --ink:#e8eef3; --ink2:#9db2c2; --grid:#25384633;
+  --line:#2b4152; --s1:#3987e5; --s2:#d95926; --tip-bg:#1c2e3c; --tip-edge:#3c566a;
+  --btn:#1c2e3c; --btn-on:#3ba7c4; --btn-on-ink:#08131b; --sel:rgba(59,167,196,.25);
+  --navy:#092c46; --navy-ink:#e8eef3; --navy-sub:#7fa6bf; --teal:#3ba7c4;
+  --controls:#14232e; --flag:#ff6f61; --flag2:#b794f6; --ok:#4cc38a;}
+html[data-lang="es"] .lang-en{display:none !important}
+html:not([data-lang="es"]) .lang-es{display:none !important}
+.langbtn{font:600 .78rem "Archivo",sans-serif; letter-spacing:.06em; border:1px solid rgba(255,255,255,.45);
+  background:transparent; color:var(--navy-ink,#fff); padding:.22rem .7rem; border-radius:999px; cursor:pointer}
+.langbtn:hover{background:rgba(255,255,255,.12)}
+
+:root{--warn:#c77700; --warn-ink:#ffffff; --nodata:#8496a4;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --warn:#e09b2d; --warn-ink:#1a1206; --nodata:#6d8291;}}
+:root[data-theme="dark"]{--warn:#e09b2d; --warn-ink:#1a1206; --nodata:#6d8291;}
+
+.chip{display:inline-flex;align-items:center;gap:.36em;font:600 .82rem "Source Sans 3",sans-serif;
+  padding:.16rem .55rem;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.chip .g{font-size:.9em;line-height:1}
+.chip.favorable{background:var(--ok);color:#fff}
+.chip.marginal{background:var(--warn);color:var(--warn-ink)}
+.chip.unfavorable{background:var(--flag);color:#fff}
+.chip.nodata{background:var(--btn);color:var(--ink2);border-color:var(--line)}
+.chip.notrated{background:transparent;color:var(--ink2);border-color:var(--line);border-style:dashed}
+
+.cell{display:flex;align-items:center;justify-content:center;min-height:1.6rem;
+  border-radius:3px;font:600 .7rem "Source Sans 3",sans-serif}
+.cell.favorable{background:var(--ok);color:#fff}
+.cell.marginal{background:var(--warn);color:var(--warn-ink)}
+.cell.unfavorable{background:var(--flag);color:#fff}
+.cell.nodata{background:var(--btn);color:var(--ink2);border:1px dashed var(--line)}
+.cell.notrated{background:transparent;color:var(--ink2);border:1px dotted var(--line)}
+
+/* NWS products sit in their own panel, visually distinct from anything we compute */
+.nws{border:2px solid var(--s2);border-radius:8px;background:var(--panel);padding:.85rem 1rem;margin:1rem 0}
+.nws h3{margin:0 0 .4rem;font:700 .95rem "Archivo",sans-serif;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--s2)}
+.nws .prod{margin:.5rem 0;padding-left:.7rem;border-left:3px solid var(--s2)}
+.nws .prod b{font:700 .95rem "Source Sans 3",sans-serif}
+.nws .meta{font:400 .8rem "Source Sans 3",sans-serif;color:var(--ink2)}
+.nws pre{white-space:pre-wrap;font:400 .82rem "JetBrains Mono",monospace;margin:.4rem 0 0}
+.nws .attrib{font:400 .78rem "Source Sans 3",sans-serif;color:var(--ink2);margin-top:.5rem}
+
+.disclaimer{border-top:1px solid var(--line);margin-top:1.6rem;padding-top:.8rem;
+  font:400 .82rem "Source Sans 3",sans-serif;color:var(--ink2)}
+.disclaimer b{color:var(--flag)}
+.agebadge{font:600 .72rem "Source Sans 3",sans-serif;padding:.05rem .4rem;border-radius:3px;
+  background:var(--btn);color:var(--ink2)}
+.agebadge.stale{background:var(--flag);color:#fff}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:.4rem .9rem;
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:.7rem .9rem;margin:.2rem 0 1rem}
+.legend .lg{display:flex;align-items:baseline;gap:.5rem}
+.legend .lgt{font-size:.86rem;color:var(--ink2);line-height:1.35}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);color:var(--ink);
+  font:400 1rem/1.5 "Source Sans 3",system-ui,sans-serif}
+header{background:var(--navy);color:var(--navy-ink)}
+.hwrap{max-width:1180px;margin:0 auto;padding:.9rem 1rem}
+.brandrow{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+h1{margin:.2rem 0 0;font:700 1.5rem "Archivo",sans-serif;letter-spacing:.01em}
+.sub{color:var(--navy-sub);font-size:.92rem;margin-top:.15rem}
+.ctrls{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.unitbtn,.tzbtn,.langbtn{font:600 .78rem "Archivo",sans-serif;letter-spacing:.06em;
+  border:1px solid rgba(255,255,255,.45);background:transparent;color:var(--navy-ink);
+  padding:.22rem .7rem;border-radius:999px;cursor:pointer}
+.unitbtn:hover,.tzbtn:hover{background:rgba(255,255,255,.12)}
+nav.tabs{background:var(--navy);border-top:1px solid rgba(255,255,255,.14)}
+nav.tabs .hwrap{padding:0 1rem;display:flex;gap:.2rem;overflow-x:auto}
+nav.tabs a{color:var(--navy-sub);text-decoration:none;padding:.55rem .8rem;white-space:nowrap;
+  font:600 .88rem "Source Sans 3",sans-serif;border-bottom:3px solid transparent}
+nav.tabs a:hover{color:var(--navy-ink)}
+nav.tabs a[aria-current="page"]{color:var(--navy-ink);border-bottom-color:var(--teal)}
+main{max-width:1180px;margin:0 auto;padding:1.2rem 1rem 2.5rem}
+h2{font:700 1.15rem "Archivo",sans-serif;margin:1.6rem 0 .6rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:1rem}
+footer{max-width:1180px;margin:0 auto;padding:0 1rem 2rem;color:var(--ink2);font-size:.85rem}
+a{color:var(--s1)}
+@media (max-width:720px){h1{font-size:1.25rem}.hwrap{padding:.7rem .8rem}main{padding:.9rem .8rem 2rem}}
+
+table.board{width:100%;border-collapse:collapse;background:var(--panel);
+  border:1px solid var(--line);border-radius:8px;overflow:hidden}
+table.board th{background:var(--controls);font:600 .78rem "Archivo",sans-serif;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);
+  padding:.5rem .6rem;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+table.board td{padding:.45rem .6rem;border-bottom:1px solid var(--grid);vertical-align:middle}
+table.board tr.grp td{background:var(--controls);font:700 .85rem "Archivo",sans-serif;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--navy);padding:.5rem .6rem}
+:root[data-theme="dark"] table.board tr.grp td,
+@media (prefers-color-scheme:dark){table.board tr.grp td{color:var(--teal)}}
+table.board tr.site:hover{background:var(--sel)}
+.sitename{font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.4rem}
+.sitename .caret{color:var(--ink2);font-size:.75rem;transition:transform .12s}
+.sitename.open .caret{transform:rotate(90deg)}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.arrow{display:inline-block;color:var(--ink2)}
+.drawer td{background:var(--surface);padding:.8rem 1rem}
+.drawer .cols{display:flex;gap:1.2rem;flex-wrap:wrap}
+.drawer .col{flex:1 1 260px;min-width:240px}
+.drawer h4{margin:0 0 .3rem;font:700 .8rem "Archivo",sans-serif;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--ink2)}
+.drawer .fcsttext{font-size:.88rem;line-height:1.45}
+.embedbox{margin-top:.6rem;border:1px solid var(--line);border-radius:6px;overflow:hidden;
+  background:var(--panel)}
+.embedbox .bar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  padding:.4rem .6rem;background:var(--controls);font-size:.85rem}
+.embedbox iframe{display:block;width:100%;height:440px;border:0;background:var(--surface)}
+.btn{font:600 .8rem "Source Sans 3",sans-serif;border:1px solid var(--line);
+  background:var(--btn);color:var(--ink);padding:.3rem .7rem;border-radius:5px;cursor:pointer}
+.btn:hover{background:var(--sel)}
+.srcline{font-size:.85rem;color:var(--ink2)}
+.srcline .down{color:var(--flag);font-weight:600}
+.lead{max-width:68ch}
+@media (max-width:860px){
+  table.board{display:block;overflow-x:auto;white-space:nowrap}
+  .drawer .col{min-width:200px}
+}
+</style>
+</head>
+<body>
+<script>(function(){var l='en';try{l=localStorage.getItem('buoys_lang')||((navigator.language||'').toLowerCase().indexOf('es')===0?'es':'en');}catch(e){}document.documentElement.setAttribute('data-lang',l);document.documentElement.lang=l;})();</script>
+<header><div class="hwrap">
+  <div class="brandrow">
+    <div style="display:flex;align-items:center;gap:.6rem"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M1.6 13.2c2.1 0 2.1 1.6 4.2 1.6s2.1-1.6 4.2-1.6 2.1 1.6 4.2 1.6 2.1-1.6 4.2-1.6 2.1 1.6 4.2 1.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 3.2v7.2M9.2 5.6h5.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div><h1><span class="lang-en">Conditions now</span><span class="lang-es">Condiciones ahora</span></h1>
+      <div class="sub"><span class="lang-en">CariCOOS Maritime Dashboard</span><span class="lang-es">Tablero Marítimo CariCOOS</span></div></div></div>
+    <div class="ctrls"><button class="unitbtn" type="button" title="knots &amp; feet / metric">kt/ft</button><button class="tzbtn" type="button" title="UTC / AST (UTC−4)">UTC</button><button class="langbtn" type="button" title="English / Español">Español</button></div>
+  </div>
+</div></header>
+<nav class="tabs"><div class="hwrap"><a href="index.html"><span class="lang-en">Overview</span><span class="lang-es">Resumen</span></a><a href="conditions_now.html" aria-current="page"><span class="lang-en">Conditions now</span><span class="lang-es">Condiciones ahora</span></a><a href="planner.html"><span class="lang-en">Planner</span><span class="lang-es">Planificador</span></a><a href="marine_zones.html"><span class="lang-en">NWS marine zones</span><span class="lang-es">Zonas marinas NWS</span></a><a href="tools.html"><span class="lang-en">Tools</span><span class="lang-es">Herramientas</span></a><a href="methods.html"><span class="lang-en">Methods</span><span class="lang-es">Métodos</span></a><a href="status.html"><span class="lang-en">Data status</span><span class="lang-es">Estado de datos</span></a></div></nav>
+<main>
+
+<div id="nws" class="nws"></div>
+<p class="lead"><span class="lang-en">Each row is a place; each of the last four columns is a kind of vessel. The colour is how suitable conditions are <b>for that kind of vessel at that place right now</b>, judged against the limits on the Methods page. Hover or tap a chip to see which limit is the binding one. <b>Click a place name</b> to see the forecast behind it and open the buoy or wind station it came from.</span><span class="lang-es">Cada fila es un lugar; cada una de las últimas cuatro columnas es un tipo de embarcación. El color indica qué tan adecuadas son las condiciones <b>para ese tipo de embarcación en ese lugar ahora mismo</b>, según los límites de la página Métodos. Pase el cursor o toque una etiqueta para ver cuál es el límite determinante. <b>Haga clic en el nombre de un lugar</b> para ver el pronóstico detrás y abrir la boya o estación de viento de donde proviene.</span></p>
+<h2><span class="lang-en">Operational Suitability</span><span class="lang-es">Idoneidad Operacional</span></h2>
+<div class="legend"><div class="lg"><span class="chip favorable"><span class="g" aria-hidden="true">●</span><span class="lang-en">Favorable</span><span class="lang-es">Favorable</span></span><span class="lgt"><span class="lang-en">Within all published limits for this vessel class.</span><span class="lang-es">Dentro de todos los límites publicados para esta clase.</span></span></div><div class="lg"><span class="chip marginal"><span class="g" aria-hidden="true">▲</span><span class="lang-en">Marginal</span><span class="lang-es">Marginal</span></span><span class="lgt"><span class="lang-en">At least one limit reached. Passable with care and experience.</span><span class="lang-es">Al menos un límite alcanzado. Transitable con cuidado y experiencia.</span></span></div><div class="lg"><span class="chip unfavorable"><span class="g" aria-hidden="true">■</span><span class="lang-en">Unfavorable</span><span class="lang-es">Desfavorable</span></span><span class="lgt"><span class="lang-en">At least one limit exceeded. Not recommended for this class.</span><span class="lang-es">Al menos un límite excedido. No recomendado para esta clase.</span></span></div><div class="lg"><span class="chip notrated"><span class="g" aria-hidden="true">·</span><span class="lang-en">Not rated here</span><span class="lang-es">No evaluado aquí</span></span><span class="lgt"><span class="lang-en">This vessel class is not assessed at this kind of location.</span><span class="lang-es">Esta clase de embarcación no se evalúa en este tipo de lugar.</span></span></div></div>
+<div class="panel" style="padding:0;overflow:hidden">
+<table class="board" id="board"></table>
+</div>
+<p class="srcline" style="margin-top:.7rem"><span class="lang-en">Operational Suitability is computed from the NWS SJU Coastal Waters Forecast for each site's marine zone. Wave period and direction are published for roughly the first three days; beyond that, ratings use wind and sea height only. Observed buoy and wind-station data are added in the next release.</span><span class="lang-es">La Idoneidad Operacional se calcula a partir del Pronóstico de Aguas Costeras del NWS SJU para la zona marina de cada lugar. El periodo y la dirección del oleaje se publican para los primeros tres días aproximadamente; más allá, la evaluación usa solo viento y altura del oleaje. Los datos observados de boyas y estaciones se añaden en la próxima versión.</span></p>
+
+<div class="disclaimer"><span class="lang-en"><b>NOT FOR NAVIGATION.</b> Operational Suitability is computed by CariCOOS from observations and forecast data using the published thresholds. It is <b>not</b> an official forecast, advisory or warning. Official marine products are issued solely by the National Weather Service and are reproduced here verbatim and unaltered. Always consult the NWS and exercise your own judgement as master of the vessel.</span><span class="lang-es"><b>NO APTO PARA LA NAVEGACIÓN.</b> La Idoneidad Operacional es calculada por CariCOOS a partir de observaciones y pronósticos usando los umbrales publicados. <b>No</b> es un pronóstico, aviso ni advertencia oficial. Los productos marinos oficiales los emite únicamente el Servicio Nacional de Meteorología (NWS) y aquí se reproducen literalmente y sin alterar. Consulte siempre al NWS y ejerza su propio criterio como capitán.</span></div>
+</main>
+<footer><span class="lang-en">Generated 2026-09-22T19:23Z from NWS SJU CWF issued 2026-09-22T07:43Z. Refreshes every 10 minutes.</span><span class="lang-es">Generado 2026-09-22T19:23Z del CWF del NWS SJU emitido 2026-09-22T07:43Z. Se actualiza cada 10 minutos.</span></footer>
+<script>
+const UNITS={m:{metric:['m',v=>v],marine:['ft',v=>v/0.3048]},kt:{metric:['m/s',v=>v/1.9438444924406046],marine:['kt',v=>v]},cms:{metric:['cm/s',v=>v],marine:['kt',v=>v*0.0194384]},nm:{metric:['km',v=>v*1.852],marine:['nmi',v=>v]},degC:{metric:['\u00b0C',v=>v],marine:['\u00b0F',v=>v*9/5+32]},s:{metric:['s',v=>v],marine:['s',v=>v]},deg:{metric:['\u00b0',v=>v],marine:['\u00b0',v=>v]},'-':{metric:['',v=>v],marine:['',v=>v]}};
+const UKEY='maritime_units';
+let U='marine';try{U=localStorage.getItem(UKEY)||'marine';}catch(e){}
+function setUnits(u){U=u;try{localStorage.setItem(UKEY,u);}catch(e){}document.querySelectorAll('.unitbtn').forEach(b=>{b.textContent=U==='marine'?'kt/ft':'m/s\u00b7m';});if(typeof onUnits==='function')onUnits();}
+function cu(kind,v){return v==null?null:UNITS[kind||'-'][U][1](v);}
+function ul(kind){return UNITS[kind||'-'][U][0];}
+function fv(kind,v,dp){if(v==null)return '\u2013';const x=cu(kind,v);const d=dp==null?(Math.abs(x)>=100?0:(Math.abs(x)>=10?0:1)):dp;const u=ul(kind);return x.toFixed(d)+(u?'\u202f'+u:'');}
+document.querySelectorAll('.unitbtn').forEach(b=>{b.textContent=U==='marine'?'kt/ft':'m/s\u00b7m';b.onclick=()=>setUnits(U==='marine'?'metric':'marine');});
+
+
+const ZKEY='buoys_tz';
+let Z='UTC';try{Z=localStorage.getItem(ZKEY)||'UTC';}catch(e){}
+const TZOFF=()=>Z==='AST'?-4*3600:0;
+function fmtTZ(epoch,withY){const d=new Date((epoch+TZOFF())*1000).toISOString();return (withY?d.slice(0,10):d.slice(5,10))+' '+d.slice(11,16);}
+function tzShiftStr(s){ /* 'YYYY-MM-DD HH:MM' (UTC) -> same in the active zone; date-only strings untouched */
+  if(!s||s.length<16||Z==='UTC')return s;const t=Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10),+s.slice(11,13),+s.slice(14,16))/1000;return fmtTZ(t,true);}
+function tzLabel(){return Z==='AST'?'AST (UTC−4)':'UTC';}
+function setTZ(z){Z=z;try{localStorage.setItem(ZKEY,z);}catch(e){}
+  document.querySelectorAll('.tzbtn').forEach(b=>{b.textContent=Z;});if(typeof onTZ==='function')onTZ();}
+document.querySelectorAll('.tzbtn').forEach(b=>{b.textContent=Z;b.onclick=()=>setTZ(Z==='UTC'?'AST':'UTC');});
+
+/* ORDER MATTERS, and it bit us twice.
+   1. LANG_JS must come BEFORE the page script, because page scripts call render()
+      at load and render() reads L and T(), which LANG_JS declares with let/function.
+      Page script first => L is in its temporal dead zone => ReferenceError before a
+      single row is drawn, and the table just renders empty with nothing on screen
+      to say why.
+   2. The page's I18N dictionary must come BEFORE LANG_JS, because LANG_JS's
+      applyI18n() runs at load and guards with `typeof I18N !== 'undefined'`.
+      That guard is NOT safe here: typeof only tolerates *undeclared* names, and a
+      `const I18N` declared further down the same scope is declared-but-uninitialised,
+      so typeof throws too. Hence its own slot, emitted first. */
+const I18N = {"title": {"en": "Conditions now", "es": "Condiciones ahora"}, "site": {"en": "Location", "es": "Lugar"}, "wind": {"en": "Wind (from)", "es": "Viento (de)"}, "gust": {"en": "Gust", "es": "Ráfaga"}, "seas": {"en": "Seas (from)", "es": "Oleaje (de)"}, "period": {"en": "Wave period", "es": "Periodo del oleaje"}, "suit": {"en": "Operational Suitability", "es": "Idoneidad Operacional"}, "src": {"en": "Source", "es": "Fuente"}, "limit": {"en": "limit", "es": "límite"}, "openin": {"en": "Open in new tab", "es": "Abrir en pestaña nueva"}, "loadtool": {"en": "Load interactive tool", "es": "Cargar herramienta interactiva"}, "nwsnone": {"en": "No NWS marine warnings, watches or advisories are in effect for the zones on this board.", "es": "No hay advertencias, vigilancias ni avisos marinos del NWS vigentes para las zonas de este tablero."}, "nwshead": {"en": "NWS products in effect", "es": "Productos del NWS vigentes"}, "fcst": {"en": "Forecast basis", "es": "Base del pronóstico"}, "detail": {"en": "Details", "es": "Detalles"}, "nrhint": {"en": "This vessel class is not assessed at this location", "es": "Esta clase de embarcación no se evalúa en este lugar"}, "why_wind_kt": {"en": "wind {v}", "es": "viento {v}"}, "why_gust_kt": {"en": "gusts {v}", "es": "ráfagas {v}"}, "why_hs_m": {"en": "seas {v}", "es": "oleaje {v}"}, "why_steepness": {"en": "steep seas {v}", "es": "oleaje escarpado {v}"}, "why_lp_swell_m": {"en": "long-period swell {v}", "es": "marejada de periodo largo {v}"}, "why_hs_beam_m": {"en": "beam seas {v}", "es": "oleaje de través {v}"}, "why_roll_ratio": {"en": "roll resonance {v}", "es": "resonancia de balance {v}"}, "why_wind_vs_curr": {"en": "wind against current {v}", "es": "viento contra corriente {v}"}};
+
+const LKEY='buoys_lang';
+let L=document.documentElement.getAttribute('data-lang')||'en';
+function T(k){const d=(typeof I18N!=='undefined')&&I18N[k];return d?(d[L]||d.en||k):k;}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(e=>{const k=e.dataset.i18n;if(typeof I18N!=='undefined'&&I18N[k])e.innerHTML=T(k);});
+  document.querySelectorAll('[data-i18n-title]').forEach(e=>{e.title=T(e.dataset.i18nTitle);});
+  document.querySelectorAll('.langbtn').forEach(b=>{b.textContent=L==='es'?'English':'Español';});
+  document.title=T('title')==='title'?document.title:T('title');
+}
+const NOTE_ES=[["stale since","sin datos desde"],["redeploy pending","redespliegue pendiente"],["off station","fuera de estación"],["offline since","fuera de línea desde"],["retired","retirada"],["inactive","inactiva"]];
+function noteT(n){if(L!=='es'||!n)return n;for(const [a,b] of NOTE_ES)n=n.split(a).join(b);return n;}
+function setLang(l){L=l;try{localStorage.setItem(LKEY,l);}catch(e){}
+  document.documentElement.setAttribute('data-lang',l);document.documentElement.lang=l;
+  applyI18n();if(typeof onLang==='function')onLang();}
+document.querySelectorAll('.langbtn').forEach(b=>b.onclick=()=>setLang(L==='es'?'en':'es'));
+applyI18n();
+
+
+const D = {"generated_utc": "2026-09-22T19:23:14.568807+00:00", "cwf_issued": "2026-09-22T07:43:00+00:00", "cwf_fetched": "2026-09-22T19:23:12.586387+00:00", "cwf_url": "https://api.weather.gov/products/3083cab1-974b-4998-900a-f50a8fadf748", "office": "SJU", "synopsis": "A surface high pressure building from the north-central Atlantic will promote light to moderate east to southeast winds through the end of the week. Seas will continue today between 1 and 3 feet. A small long-period northeasterly swell will reach the area late Wednesday, and build seas between 3 to 4 feet across the Atlantic and Caribbean waters, including the local passages. Afternoon thunderstorms developing from the Atlantic and western coastal waters of Puerto Rico may produce locally strong gusts, torrential rainfall, and frequent lightning through the early evening hours each day.", "classes": [{"key": "ship", "en": "Commercial ship", "es": "Buque comercial"}, {"key": "ferry", "en": "Ferry / passenger", "es": "Ferry / pasajeros"}, {"key": "small", "en": "Small craft", "es": "Embarcación pequeña"}, {"key": "rec", "en": "Recreational", "es": "Recreativa"}], "groups": [{"key": "North", "en": "North coast", "es": "Costa norte"}, {"key": "East", "en": "East coast", "es": "Costa este"}, {"key": "Vieques-Culebra", "en": "Vieques & Culebra", "es": "Vieques y Culebra"}, {"key": "South", "en": "South coast", "es": "Costa sur"}, {"key": "West/Mona", "en": "West coast & Mona Passage", "es": "Costa oeste y Canal de la Mona"}, {"key": "USVI", "en": "U.S. Virgin Islands", "es": "Islas Vírgenes de EE.UU."}], "sites": [{"id": "SJU_ENT", "en": "San Juan Harbor entrance", "es": "Entrada de la Bahia de San Juan", "group": "North", "kind": "port", "zone": "AMZ712", "lat": 18.472, "lon": -66.118, "notes_en": "Bar Channel. Long-period NNW swell drives berth ranging at Puerto Nuevo", "notes_es": "Bar Channel. Long-period NNW swell drives berth ranging at Puerto Nuevo", "wind_kt": 10.0, "gust_kt": 20.0, "wdir": 90.0, "hs_m": 0.9144000000000001, "tp_s": 6.0, "dp": 90.0, "period_label": "TODAY", "period_text": "East winds 5 to 10 knots, increasing to 10 to 15 knots with gusts up to 20 knots this afternoon. Seas 2 to 3 feet. Wave Detail: East 3 feet at 6 seconds. Scattered showers. Isolated thunderstorms this afternoon.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"ship": {"status": "favorable", "driver": "hs_m", "value": 0.9144000000000001, "limit": null, "unit": "m", "source": "pilot-boarding practice - VERIFY with PR/USVI pilots"}, "ferry": {"status": "favorable", "driver": "gust_kt", "value": 20.0, "limit": null, "unit": "kt", "source": "operator practice; NWS Gale criteria 34 kt - VERIFY"}, "small": {"status": "favorable", "driver": "gust_kt", "value": 20.0, "limit": null, "unit": "kt", "source": "NWS SCA upper bound; Beaufort 7 - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.9144000000000001, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "buoys", "embed_url": "../Buoys_Dashboard/", "embed_en": "Ocean Buoys Hub", "embed_es": "Centro de Boyas", "obs_wave": [{"id": "PR2", "name": "San Juan buoy", "link": "../Buoys_Dashboard/", "down": false}, {"id": "CDIP249", "name": "Arecibo Waverider", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XSNF", "name": "San Juan Port", "link": "../Mesonet_Dashboard/", "down": false}, {"id": "XJUA", "name": "San Juan NavAid", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "ARE_ENT", "en": "Arecibo", "es": "Arecibo", "group": "North", "kind": "port", "zone": "AMZ712", "lat": 18.482, "lon": -66.702, "notes_en": "CDIP 249 Waverider sits essentially on this approach", "notes_es": "CDIP 249 Waverider sits essentially on this approach", "wind_kt": 10.0, "gust_kt": 20.0, "wdir": 90.0, "hs_m": 0.9144000000000001, "tp_s": 6.0, "dp": 90.0, "period_label": "TODAY", "period_text": "East winds 5 to 10 knots, increasing to 10 to 15 knots with gusts up to 20 knots this afternoon. Seas 2 to 3 feet. Wave Detail: East 3 feet at 6 seconds. Scattered showers. Isolated thunderstorms this afternoon.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"small": {"status": "favorable", "driver": "gust_kt", "value": 20.0, "limit": null, "unit": "kt", "source": "NWS SCA upper bound; Beaufort 7 - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.9144000000000001, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "buoys", "embed_url": "../Buoys_Dashboard/", "embed_en": "Ocean Buoys Hub", "embed_es": "Centro de Boyas", "obs_wave": [{"id": "CDIP249", "name": "Arecibo Waverider", "link": "../Buoys_Dashboard/", "down": false}, {"id": "PR2", "name": "San Juan buoy", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XSNF", "name": "San Juan Port", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "FAJ_CRO", "en": "Fajardo / Las Croabas", "es": "Fajardo / Las Croabas", "group": "East", "kind": "inlet", "zone": "AMZ726", "lat": 18.362, "lon": -65.62, "notes_en": "Reef-strewn approach; NE trades build short steep chop over the shoals", "notes_es": "Reef-strewn approach; NE trades build short steep chop over the shoals", "wind_kt": 10.0, "gust_kt": null, "wdir": 90.0, "hs_m": 0.6096, "tp_s": 5.0, "dp": 90.0, "period_label": "TODAY", "period_text": "East winds around 10 knots. Seas around 2 feet. Wave Detail: East 2 feet at 5 seconds. Scattered showers early this morning, then isolated showers late this morning and afternoon.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"small": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator judgement - CARICOOS to confirm"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "mesonet", "embed_url": "../Mesonet_Dashboard/", "embed_en": "Wind Stations Hub", "embed_es": "Centro de Estaciones de Viento", "obs_wave": [{"id": "PR3", "name": "Vieques buoy", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XREY", "name": "Del Rey Marina", "link": "../Mesonet_Dashboard/", "down": false}, {"id": "XCUL", "name": "Isla Culebrita", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "FAJ_REY", "en": "Puerto del Rey, Fajardo", "es": "Puerto del Rey, Fajardo", "group": "East", "kind": "port", "zone": "AMZ726", "lat": 18.287, "lon": -65.632, "notes_en": "Largest marina in the Caribbean; ferry and charter departures", "notes_es": "Largest marina in the Caribbean; ferry and charter departures", "wind_kt": 10.0, "gust_kt": null, "wdir": 90.0, "hs_m": 0.6096, "tp_s": 5.0, "dp": 90.0, "period_label": "TODAY", "period_text": "East winds around 10 knots. Seas around 2 feet. Wave Detail: East 2 feet at 5 seconds. Scattered showers early this morning, then isolated showers late this morning and afternoon.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"ferry": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator practice - VERIFY with the ferry operators"}, "small": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "NWS SJU SCA seas 6 ft = 1.83 m - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "mesonet", "embed_url": "../Mesonet_Dashboard/", "embed_en": "Wind Stations Hub", "embed_es": "Centro de Estaciones de Viento", "obs_wave": [{"id": "PR3", "name": "Vieques buoy", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XREY", "name": "Del Rey Marina", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "VQS_ISA", "en": "Isabel II, Vieques", "es": "Isabel II, Vieques", "group": "Vieques-Culebra", "kind": "port", "zone": "AMZ726", "lat": 18.152, "lon": -65.444, "notes_en": "Ferry terminal; exposed to N and NE swell wrapping Vieques", "notes_es": "Ferry terminal; exposed to N and NE swell wrapping Vieques", "wind_kt": 10.0, "gust_kt": null, "wdir": 90.0, "hs_m": 0.6096, "tp_s": 5.0, "dp": 90.0, "period_label": "TODAY", "period_text": "East winds around 10 knots. Seas around 2 feet. Wave Detail: East 2 feet at 5 seconds. Scattered showers early this morning, then isolated showers late this morning and afternoon.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"ferry": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator practice - VERIFY with the ferry operators"}, "small": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "NWS SJU SCA seas 6 ft = 1.83 m - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "buoys", "embed_url": "../Buoys_Dashboard/", "embed_en": "Ocean Buoys Hub", "embed_es": "Centro de Boyas", "obs_wave": [{"id": "PR3", "name": "Vieques buoy", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XCUL", "name": "Isla Culebrita", "link": "../Mesonet_Dashboard/", "down": false}, {"id": "XREY", "name": "Del Rey Marina", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "CUL_EH", "en": "Ensenada Honda, Culebra", "es": "Ensenada Honda, Culebra", "group": "Vieques-Culebra", "kind": "anchorage", "zone": "AMZ726", "lat": 18.302, "lon": -65.293, "notes_en": "Hurricane hole; swell rarely enters, SE wind fetch is the real issue", "notes_es": "Hurricane hole; swell rarely enters, SE wind fetch is the real issue", "wind_kt": 10.0, "gust_kt": null, "wdir": 90.0, "hs_m": 0.6096, "tp_s": 5.0, "dp": 90.0, "period_label": "TODAY", "period_text": "East winds around 10 knots. Seas around 2 feet. Wave Detail: East 2 feet at 5 seconds. Scattered showers early this morning, then isolated showers late this morning and afternoon.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"ferry": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator practice - VERIFY with the ferry operators"}, "small": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "NWS SJU SCA seas 6 ft = 1.83 m - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "mesonet", "embed_url": "../Mesonet_Dashboard/", "embed_en": "Wind Stations Hub", "embed_es": "Centro de Estaciones de Viento", "obs_wave": [{"id": "PR3", "name": "Vieques buoy", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XCUL", "name": "Isla Culebrita", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "PON_ENT", "en": "Ponce Harbor entrance", "es": "Entrada del Puerto de Ponce", "group": "South", "kind": "port", "zone": "AMZ735", "lat": 17.954, "lon": -66.617, "notes_en": "Lee coast; SE trade swell wraps Caja de Muertos. Nearest tide gauge is Guayanilla", "notes_es": "Lee coast; SE trade swell wraps Caja de Muertos. Nearest tide gauge is Guayanilla", "wind_kt": 10.0, "gust_kt": 20.0, "wdir": 90.0, "hs_m": 0.9144000000000001, "tp_s": 6.0, "dp": 135.0, "period_label": "TODAY", "period_text": "East winds 5 to 10 knots, increasing to 10 to 15 knots with gusts up to 20 knots this afternoon. Seas 2 to 3 feet. Wave Detail: Southeast 2 feet at 6 seconds. Scattered showers, mainly this morning.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"ship": {"status": "favorable", "driver": "hs_m", "value": 0.9144000000000001, "limit": null, "unit": "m", "source": "pilot-boarding practice - VERIFY with PR/USVI pilots"}, "small": {"status": "favorable", "driver": "gust_kt", "value": 20.0, "limit": null, "unit": "kt", "source": "NWS SCA upper bound; Beaufort 7 - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.9144000000000001, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "buoys", "embed_url": "../Buoys_Dashboard/", "embed_en": "Ocean Buoys Hub", "embed_es": "Centro de Boyas", "obs_wave": [{"id": "PR1", "name": "Ponce buoy", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XIMG", "name": "Isla Magueyes", "link": "../Mesonet_Dashboard/", "down": false}, {"id": "XMRS", "name": "Las Mareas", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "SAL_ENT", "en": "Salinas / Bahia de Jobos", "es": "Salinas / Bahia de Jobos", "group": "South", "kind": "port", "zone": "AMZ735", "lat": 17.948, "lon": -66.287, "notes_en": "Display point is inside the bay and resolves to no marine zone; zone_lat/lon nudged offshore", "notes_es": "Display point is inside the bay and resolves to no marine zone; zone_lat/lon nudged offshore", "wind_kt": 10.0, "gust_kt": 20.0, "wdir": 90.0, "hs_m": 0.9144000000000001, "tp_s": 6.0, "dp": 135.0, "period_label": "TODAY", "period_text": "East winds 5 to 10 knots, increasing to 10 to 15 knots with gusts up to 20 knots this afternoon. Seas 2 to 3 feet. Wave Detail: Southeast 2 feet at 6 seconds. Scattered showers, mainly this morning.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"small": {"status": "favorable", "driver": "gust_kt", "value": 20.0, "limit": null, "unit": "kt", "source": "NWS SCA upper bound; Beaufort 7 - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.9144000000000001, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "mesonet", "embed_url": "../Mesonet_Dashboard/", "embed_en": "Wind Stations Hub", "embed_es": "Centro de Estaciones de Viento", "obs_wave": [{"id": "PR1", "name": "Ponce buoy", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XMRS", "name": "Las Mareas", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "MAY_ENT", "en": "Mayaguez Harbor", "es": "Puerto de Mayaguez", "group": "West/Mona", "kind": "port", "zone": "AMZ742", "lat": 18.217, "lon": -67.165, "notes_en": "Resolves to the NORTHWESTERN zone AMZ742, not AMZ745; confirmed live", "notes_es": "Resolves to the NORTHWESTERN zone AMZ742, not AMZ745; confirmed live", "wind_kt": 5.0, "gust_kt": null, "wdir": 90.0, "hs_m": 0.6096, "tp_s": 6.0, "dp": 135.0, "period_label": "TODAY", "period_text": "East winds around 5 knots. Seas around 2 feet. Wave Detail: Southeast 2 feet at 6 seconds. Scattered showers with isolated thunderstorms early this afternoon. Numerous showers with isolated thunderstorms late.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"ship": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "pilot-boarding practice - VERIFY with PR/USVI pilots"}, "small": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "NWS SJU SCA seas 6 ft = 1.83 m - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "buoys", "embed_url": "../Buoys_Dashboard/", "embed_en": "Ocean Buoys Hub", "embed_es": "Centro de Boyas", "obs_wave": [{"id": "CDIP181", "name": "Rincon Waverider", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XCDP", "name": "Club Deportivo del Oeste", "link": "../Mesonet_Dashboard/", "down": false}, {"id": "XAGU", "name": "Aguadilla", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "MONA_MID", "en": "Mona Passage mid-channel", "es": "Canal de la Mona (centro)", "group": "West/Mona", "kind": "passage", "zone": "AMZ741", "lat": 18.2, "lon": -67.6, "notes_en": "Wind-against-current steepening on N-going flow; the classic PR-DR crossing call", "notes_es": "Wind-against-current steepening on N-going flow; the classic PR-DR crossing call", "wind_kt": 15.0, "gust_kt": 20.0, "wdir": 90.0, "hs_m": 0.9144000000000001, "tp_s": 6.0, "dp": 135.0, "period_label": "TODAY", "period_text": "East winds 10 to 15 knots with gusts up to 20 knots, diminishing to 5 to 10 knots late. Seas around 3 feet. Wave Detail: Southeast 3 feet at 6 seconds. Scattered showers early this morning. Isolated showers late this morning and afternoon.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"ship": {"status": "favorable", "driver": "hs_m", "value": 0.9144000000000001, "limit": null, "unit": "m", "source": "pilot-boarding practice - VERIFY with PR/USVI pilots"}, "small": {"status": "favorable", "driver": "gust_kt", "value": 20.0, "limit": null, "unit": "kt", "source": "NWS SCA upper bound; Beaufort 7 - VERIFY"}}, "embed": "modviewer", "embed_url": "https://modviewer.caricoos.org/", "embed_en": "Model Viewer", "embed_es": "Visor de Modelos", "obs_wave": [{"id": "CDIP181", "name": "Rincon Waverider", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XCRL", "name": "Cabo Rojo Lighthouse", "link": "../Mesonet_Dashboard/", "down": false}, {"id": "XAGU", "name": "Aguadilla", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "RINCON", "en": "Rincon / Tres Palmas", "es": "Rincon / Tres Palmas", "group": "West/Mona", "kind": "fishing", "zone": "AMZ742", "lat": 18.348, "lon": -67.266, "notes_en": "NW winter groundswell; Waverider CDIP 181 is right on top of it", "notes_es": "NW winter groundswell; Waverider CDIP 181 is right on top of it", "wind_kt": 5.0, "gust_kt": null, "wdir": 90.0, "hs_m": 0.6096, "tp_s": 6.0, "dp": 135.0, "period_label": "TODAY", "period_text": "East winds around 5 knots. Seas around 2 feet. Wave Detail: Southeast 2 feet at 6 seconds. Scattered showers with isolated thunderstorms early this afternoon. Numerous showers with isolated thunderstorms late.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"small": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "NWS SJU SCA seas 6 ft = 1.83 m - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "buoys", "embed_url": "../Buoys_Dashboard/", "embed_en": "Ocean Buoys Hub", "embed_es": "Centro de Boyas", "obs_wave": [{"id": "CDIP181", "name": "Rincon Waverider", "link": "../Buoys_Dashboard/", "down": false}], "obs_wind": [{"id": "XCDP", "name": "Club Deportivo del Oeste", "link": "../Mesonet_Dashboard/", "down": false}, {"id": "XAGU", "name": "Aguadilla", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "CHAR_AM", "en": "Charlotte Amalie Harbor", "es": "Puerto de Charlotte Amalie", "group": "USVI", "kind": "port", "zone": "AMZ726", "lat": 18.3306, "lon": -64.9258, "notes_en": "Cruise anchorage and tendering; S swell makes tender ops marginal for cruise tendering", "notes_es": "Cruise anchorage and tendering; S swell makes tender ops marginal for cruise tendering", "wind_kt": 10.0, "gust_kt": null, "wdir": 90.0, "hs_m": 0.6096, "tp_s": 5.0, "dp": 90.0, "period_label": "TODAY", "period_text": "East winds around 10 knots. Seas around 2 feet. Wave Detail: East 2 feet at 5 seconds. Scattered showers early this morning, then isolated showers late this morning and afternoon.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"ship": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "pilot-boarding practice - VERIFY with PR/USVI pilots"}, "ferry": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator practice - VERIFY with the ferry operators"}, "small": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "NWS SJU SCA seas 6 ft = 1.83 m - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "mesonet", "embed_url": "../Mesonet_Dashboard/", "embed_en": "Wind Stations Hub", "embed_es": "Centro de Estaciones de Viento", "obs_wave": [{"id": "VI1", "name": "St. John buoy", "link": "../Buoys_Dashboard/", "down": true}], "obs_wind": [{"id": "XAMA", "name": "Charlotte Amalie Harbor", "link": "../Mesonet_Dashboard/", "down": false}, {"id": "XRUP", "name": "Rupert Rock", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "CRUZ_BAY", "en": "Cruz Bay, St. John", "es": "Cruz Bay, St. John", "group": "USVI", "kind": "port", "zone": "AMZ726", "lat": 18.331, "lon": -64.795, "notes_en": "Display point is inside the harbour and resolves to NO zone; zone_lat/lon nudged into Pillsbury Sound", "notes_es": "Display point is inside the harbour and resolves to NO zone; zone_lat/lon nudged into Pillsbury Sound", "wind_kt": 10.0, "gust_kt": null, "wdir": 90.0, "hs_m": 0.6096, "tp_s": 5.0, "dp": 90.0, "period_label": "TODAY", "period_text": "East winds around 10 knots. Seas around 2 feet. Wave Detail: East 2 feet at 5 seconds. Scattered showers early this morning, then isolated showers late this morning and afternoon.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"ferry": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator practice - VERIFY with the ferry operators"}, "small": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "NWS SJU SCA seas 6 ft = 1.83 m - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.6096, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "mesonet", "embed_url": "../Mesonet_Dashboard/", "embed_en": "Wind Stations Hub", "embed_es": "Centro de Estaciones de Viento", "obs_wave": [{"id": "VI1", "name": "St. John buoy", "link": "../Buoys_Dashboard/", "down": true}], "obs_wind": [{"id": "XWTR", "name": "Water Island", "link": "../Mesonet_Dashboard/", "down": false}, {"id": "XRUP", "name": "Rupert Rock", "link": "../Mesonet_Dashboard/", "down": false}]}, {"id": "STX_CHR", "en": "Christiansted, St. Croix", "es": "Christiansted, St. Croix", "group": "USVI", "kind": "port", "zone": "AMZ733", "lat": 17.753, "lon": -64.703, "notes_en": "Reef-protected entrance; N swell breaks on the barrier reef", "notes_es": "Reef-protected entrance; N swell breaks on the barrier reef", "wind_kt": 10.0, "gust_kt": null, "wdir": 90.0, "hs_m": 0.9144000000000001, "tp_s": 6.0, "dp": 135.0, "period_label": "TODAY", "period_text": "East winds around 10 knots. Seas 2 to 3 feet. Wave Detail: Southeast 3 feet at 6 seconds. Scattered showers this morning.", "start_utc": "2026-09-22T07:43:00+00:00", "end_utc": "2026-09-22T22:00:00+00:00", "ratings": {"ship": {"status": "favorable", "driver": "hs_m", "value": 0.9144000000000001, "limit": null, "unit": "m", "source": "pilot-boarding practice - VERIFY with PR/USVI pilots"}, "small": {"status": "favorable", "driver": "hs_m", "value": 0.9144000000000001, "limit": null, "unit": "m", "source": "NWS SJU SCA seas 6 ft = 1.83 m - VERIFY"}, "rec": {"status": "favorable", "driver": "hs_m", "value": 0.9144000000000001, "limit": null, "unit": "m", "source": "operator judgement; comfort threshold"}}, "embed": "buoys", "embed_url": "../Buoys_Dashboard/", "embed_en": "Ocean Buoys Hub", "embed_es": "Centro de Boyas", "obs_wave": [{"id": "VI1", "name": "St. John buoy", "link": "../Buoys_Dashboard/", "down": true}], "obs_wind": [{"id": "XCRX", "name": "Sandy Point NWR", "link": "../Mesonet_Dashboard/", "down": false}, {"id": "XBUK", "name": "Buck Island", "link": "../Mesonet_Dashboard/", "down": false}]}], "alerts": [], "status_bi": {"favorable": {"en": "Favorable", "es": "Favorable"}, "marginal": {"en": "Marginal", "es": "Marginal"}, "unfavorable": {"en": "Unfavorable", "es": "Desfavorable"}, "nodata": {"en": "No data", "es": "Sin datos"}, "notrated": {"en": "Not rated here", "es": "No evaluado aquí"}}, "glyph": {"favorable": "●", "marginal": "▲", "unfavorable": "■", "nodata": "–", "notrated": "·"}};
+const VU = {"wind_kt": "kt", "gust_kt": "kt", "hs_m": "m", "steepness": "-", "lp_swell_m": "m", "hs_beam_m": "m", "roll_ratio": "-", "wind_vs_curr": "kt"};
+
+function T(k){const d=I18N[k];return d?(d[L]||d.en||k):k;}
+function nm(o){return L==='es'?(o.es||o.en):o.en;}
+function dirArrow(deg){
+  if(deg==null)return '';
+  return '<span class="arrow" style="transform:rotate('+((deg+180)%360)+'deg)" '+
+         'aria-hidden="true">&#8593;</span>';
+}
+function statusLabel(st){const s=D.status_bi[st]||D.status_bi.nodata;return nm(s);}
+function why(r){
+  if(!r.driver)return '';
+  const v=fv(r.unit,r.value);
+  let s=T('why_'+r.driver).replace('{v}',v);
+  if(r.limit!=null)s+=' · '+T('limit')+' '+fv(r.unit,r.limit);
+  return s;
+}
+function chip(r){
+  if(!r)return '<span class="chip notrated"><span class="g">·</span></span>';
+  const t=(r.status==='favorable'||r.status==='nodata'||r.status==='notrated')
+          ?statusLabel(r.status):why(r);
+  return '<span class="chip '+r.status+'" title="'+statusLabel(r.status)+
+         (r.driver?(' — '+why(r).replace(/"/g,'&quot;')):'')+'">'+
+         '<span class="g" aria-hidden="true">'+(D.glyph[r.status]||'')+'</span>'+
+         statusLabel(r.status)+'</span>';
+}
+function fmtWindow(s,e){
+  if(!s||!e)return '';
+  const a=Math.floor(Date.parse(s)/1000), b=Math.floor(Date.parse(e)/1000);
+  return fmtTZ(a,false)+' – '+fmtTZ(b,false)+' '+tzLabel();
+}
+
+function render(){
+  const tb=document.getElementById('board');
+  let h='<thead><tr>'+
+    '<th>'+T('site')+'</th><th>'+T('wind')+'</th><th>'+T('seas')+'</th>'+
+    '<th>'+T('period')+'</th>';
+  D.classes.forEach(c=>{h+='<th>'+nm(c)+'</th>';});
+  h+='</tr></thead><tbody>';
+  D.groups.forEach(g=>{
+    h+='<tr class="grp"><td colspan="'+(4+D.classes.length)+'">'+nm(g)+'</td></tr>';
+    D.sites.filter(s=>s.group===g.key).forEach(s=>{
+      const w=s.wind_kt==null?'–':(dirArrow(s.wdir)+' '+fv('kt',s.wind_kt,0)+
+        (s.gust_kt!=null?(' <span class="srcline">G '+fv('kt',s.gust_kt,0)+'</span>'):''));
+      const sea=s.hs_m==null?'–':(dirArrow(s.dp)+' '+fv('m',s.hs_m,1));
+      const tp=s.tp_s==null?'–':fv('s',s.tp_s,0);
+      h+='<tr class="site" data-id="'+s.id+'">'+
+         '<td><span class="sitename" data-t="'+s.id+'"><span class="caret">▶</span>'+
+         nm(s)+'</span></td>'+
+         '<td class="num">'+w+'</td><td class="num">'+sea+'</td><td class="num">'+tp+'</td>';
+      D.classes.forEach(c=>{
+      /* An empty cell reads as "broken". Say plainly that the class is not
+         assessed here instead of leaving a hole in the table. */
+      h+='<td>'+(s.ratings[c.key]?chip(s.ratings[c.key])
+        :'<span class="chip notrated" title="'+T('nrhint')+
+         '"><span class="g" aria-hidden="true">\u00b7</span>'+
+         statusLabel('notrated')+'</span>')+'</td>';});
+      h+='</tr><tr class="drawer" id="d_'+s.id+'" hidden><td colspan="'+
+         (4+D.classes.length)+'">'+drawer(s)+'</td></tr>';
+    });
+  });
+  tb.innerHTML=h+'</tbody>';
+  tb.querySelectorAll('.sitename').forEach(el=>{
+    el.onclick=()=>{
+      const row=document.getElementById('d_'+el.dataset.t);
+      row.hidden=!row.hidden; el.classList.toggle('open',!row.hidden);
+    };
+  });
+}
+
+function drawer(s){
+  const srcs=(a)=>a.length?a.map(x=>'<a href="'+x.link+'">'+x.id+'</a>'+
+      (x.down?' <span class="down">('+noteT('offline')+')</span>':'')).join(', '):'–';
+  let h='<div class="cols"><div class="col"><h4>'+T('fcst')+'</h4>'+
+    '<div class="fcsttext"><b>'+s.zone+'</b> · '+fmtWindow(s.start_utc,s.end_utc)+'<br>'+
+    '<span class="srcline">'+(s.period_text||'')+'</span></div>'+
+    '<div class="srcline" style="margin-top:.5rem">'+T('src')+': NWS '+D.office+
+    ' Coastal Waters Forecast'+(D.cwf_url?' · <a href="'+D.cwf_url+'">'+T('openin')+
+    ' ↗</a>':'')+'</div></div>';
+  h+='<div class="col"><h4>'+T('detail')+'</h4><div class="srcline">'+
+     'Waves: '+srcs(s.obs_wave)+'<br>Wind: '+srcs(s.obs_wind)+'</div>'+
+     (s.notes_en?('<div class="srcline" style="margin-top:.4rem">'+
+      (L==='es'?s.notes_es:s.notes_en)+'</div>'):'')+'</div></div>';
+  if(s.embed_url){
+    h+='<div class="embedbox"><div class="bar"><span>'+
+       (L==='es'?s.embed_es:s.embed_en)+'</span><span>'+
+       '<button class="btn" data-embed="'+s.id+'">'+T('loadtool')+'</button> '+
+       '<a class="btn" href="'+s.embed_url+'" target="_blank" rel="noopener">'+
+       T('openin')+' ↗</a></span></div>'+
+       '<div id="f_'+s.id+'"></div></div>';
+  }
+  return h;
+}
+
+/* Click-to-load: four full applications must not all start downloading just
+   because someone opened this page. */
+document.addEventListener('click',function(ev){
+  const b=ev.target.closest('[data-embed]'); if(!b)return;
+  const s=D.sites.find(x=>x.id===b.dataset.embed); if(!s)return;
+  const box=document.getElementById('f_'+s.id);
+  if(box.querySelector('iframe'))return;
+  const f=document.createElement('iframe');
+  f.src=s.embed_url; f.loading='lazy'; f.title=s.embed_en;
+  f.referrerPolicy='no-referrer-when-downgrade';
+  f.setAttribute('sandbox','allow-scripts allow-same-origin allow-popups allow-forms');
+  box.appendChild(f); b.disabled=true;
+});
+
+function renderNws(){
+  const el=document.getElementById('nws');
+  let h='<h3>'+T('nwshead')+'</h3>';
+  if(!D.alerts.length){
+    h+='<div class="srcline">'+T('nwsnone')+'</div>';
+  }else{
+    D.alerts.forEach(a=>{
+      /* NWS wording is reproduced verbatim and never translated. */
+      h+='<div class="prod"><b>'+a.event+'</b> — '+(a.sender||'NWS')+
+         '<div class="meta">'+(a.zones||[]).join(', ')+
+         (a.expires?(' · until '+a.expires):'')+'</div>'+
+         (a.headline?'<pre>'+a.headline+'</pre>':'')+'</div>';
+    });
+  }
+  h+='<div class="attrib">Official marine products are issued by the National Weather '+
+     'Service and are reproduced here verbatim. <a href="https://www.weather.gov/sju/" '+
+     'target="_blank" rel="noopener">weather.gov/sju ↗</a></div>';
+  el.innerHTML=h;
+}
+
+function onLang(){render();renderNws();}
+function onUnits(){render();}
+function onTZ(){render();}
+render();renderNws();
+
+</script>
+</body>
+</html>

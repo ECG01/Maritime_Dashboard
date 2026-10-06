@@ -1,0 +1,19 @@
+# Ferry / crossing routes. Rated in BOTH directions: outbound uses bearing_deg,
+# inbound uses bearing_deg+180, because a beam sea on the way out is a following
+# sea on the way back. Phase 2 drives ferry_routes.html from this file; Phase 1
+# only uses it to rate the route endpoints.
+#
+# WARNING - UNVERIFIED METADATA. operator, distance_nm, service_kt and especially
+# roll_period_s are best estimates, NOT operator-supplied figures. They live in this
+# TSV so a CARICOOS operator or a ferry captain can correct them without touching
+# code. roll_period_s '-' falls back to the class default. One real roll period from
+# one operator would make the resonance rating genuinely trustworthy.
+#
+# bearing_deg  true bearing from -> to
+# roll_period_s vessel natural roll period Tr, for IMO MSC.1/Circ.1228 resonance
+route_id	active	name_en	name_es	from_site	to_site	from_lat	from_lon	to_lat	to_lon	bearing_deg	distance_nm	service_kt	vessel_class	roll_period_s	zone	obs_wave	obs_wind	operator	notes
+CEIBA_VQS	1	Ceiba - Vieques (Isabel II)	Ceiba - Vieques (Isabel II)	-	VQS_ISA	18.2280	-65.6090	18.1520	-65.4440	118	11.2	20	ferry	8.0	AMZ726	PR3	XREY,XCUL	PR Maritime Transport Authority	Beam SE swell across Vieques Sound on strong trades. Service speed UNVERIFIED
+CEIBA_CUL	1	Ceiba - Culebra (Dewey)	Ceiba - Culebra (Dewey)	-	CUL_EH	18.2280	-65.6090	18.3030	-65.3020	069	18.5	20	ferry	8.0	AMZ726	PR3	XCUL	PR Maritime Transport Authority	Quartering NE seas most of the year. Service speed UNVERIFIED
+RHK_CRZ	1	Red Hook - Cruz Bay	Red Hook - Cruz Bay	-	CRUZ_BAY	18.3260	-64.8510	18.3310	-64.7950	083	3.3	12	ferry	6.0	AMZ726	VI1	XWTR	USVI ferry operators	Pillsbury Sound; short steep chop and tidal current at the cut, not swell
+CHA_CRZ	1	Charlotte Amalie - Cruz Bay	Charlotte Amalie - Cruz Bay	CHAR_AM	CRUZ_BAY	18.3400	-64.9310	18.3310	-64.7950	094	8.0	14	ferry	7.0	AMZ726	VI1	XAMA,XRUP	USVI ferry operators	Exposed off Great St. James on a S swell
+FAJ_STT	0	Fajardo - Charlotte Amalie	Fajardo - Charlotte Amalie	FAJ_REY	CHAR_AM	18.3350	-65.6310	18.3400	-64.9310	091	40.0	25	ferry	8.0	AMZ726	PR3	XCUL,XRUP	seasonal / suspended	Virgin Passage. active=0; kept for planning and for when service resumes
