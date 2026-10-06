@@ -40,3 +40,8 @@ ask "¿Cuál es el mes más calmado del año en Ponce?"
 ask "¿Cómo estuvo el mar el 3 de marzo de 2024 en San Juan?"
 # Must lead with "stopped reporting in 2015" before quoting any number.
 ask "What is the wind climatology at XAMA?"
+# Debe elegir una estacion que SI tenga banda en vez de rendirse con la primera
+# que no la tiene - fallo real del 2026-10-06, miro San Juan Port (10 meses de
+# registro) y dijo que la climatologia no tiene percentiles para ninguna.
+# Y con un Heat Advisory vigente, debe mencionarlo.
+ask "¿La temperatura del aire está normal hoy?"
