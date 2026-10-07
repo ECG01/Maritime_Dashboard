@@ -45,3 +45,7 @@ ask "What is the wind climatology at XAMA?"
 # registro) y dijo que la climatologia no tiene percentiles para ninguna.
 # Y con un Heat Advisory vigente, debe mencionarlo.
 ask "¿La temperatura del aire está normal hoy?"
+# Debe dar el numero del indice y parar. Fallo real del 2026-10-06: dijo
+# "0.5 kt, muy debil, asi que el viento no esta forzando mucho contra la
+# corriente" - calificar la medida y, peor, inferir que hace el viento al agua.
+ask "¿Viento y corriente en Ponce?"
