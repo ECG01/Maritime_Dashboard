@@ -47,7 +47,10 @@ I18N = {
                        "above MLLW. This is water depth, not wave height.",
                  "es": "La próxima pleamar o bajamar, y el nivel del mar en ese momento "
                        "sobre MLLW. Es altura de agua, no altura de ola."},
-    "hi": {"en": "High", "es": "Pleamar"}, "lo": {"en": "Low", "es": "Bajamar"},
+    # "Pleamar" y "bajamar" son los terminos nauticos correctos y los que menos
+    # gente reconoce. Este tablero es para quien no deberia tener que aprender
+    # vocabulario para leerlo.
+    "hi": {"en": "High", "es": "Marea alta"}, "lo": {"en": "Low", "es": "Marea baja"},
     # The observed level and the high/low times come from DIFFERENT CO-OPS
     # products: one is what the gauge reads, the other is astronomical
     # prediction. Labelled separately on purpose - showing a prediction as a
@@ -216,6 +219,18 @@ function nm(o){return L==='es'?(o.es||o.en):o.en;}
 /* Next high or low, with the observed level underneath when a real gauge exists.
    Many PR/USVI stations are prediction-only subordinate stations with no gauge at
    all, so the observed line is genuinely optional and its absence is not an error. */
+/* Reloj de 12 horas. hublib.fmtTZ devuelve 24 h y es codigo vendido que
+   tools/check_hublib_drift.py vigila, asi que la conversion vive aqui y no
+   alla: tocar fmtTZ arrastraria tambien al Centro de Boyas. Toma el "HH:MM"
+   que fmtTZ ya entrego en la zona activa y solo lo reescribe, asi que sigue
+   respetando el boton UTC/AST. */
+function hm12(epoch){
+  const s=fmtTZ(epoch,false).slice(-5);
+  let h=+s.slice(0,2);
+  const ap = h<12 ? 'AM' : 'PM';
+  h = h%12 || 12;          /* medianoche -> 12 AM, mediodia -> 12 PM */
+  return h+':'+s.slice(3)+'\u202f'+ap;
+}
 function tideCell(t){
   if(!t)return '<span class="g2" title="'+T('notide')+'">–</span>';
   let h='';
@@ -223,7 +238,7 @@ function tideCell(t){
     const when=Math.floor(Date.parse(t.next.t)/1000);
     /* Just the clock time: the next high or low is always within about twelve
        hours, so the date is noise in a column people scan. */
-    const hhmm=fmtTZ(when,false).slice(-5);
+    const hhmm=hm12(when);
     h+='<span class="stp">'+(t.next.type==='H'?T('hi'):T('lo'))+' '+hhmm+'</span>';
   }
   if(t.observed!=null)
@@ -249,11 +264,11 @@ function whenCell(s){
   const a=Math.floor(Date.parse(iso)/1000);
   let sub;
   if(obsT){
-    sub='<span class="g2 sw obs">'+T('measured')+' '+fmtTZ(a,false).slice(-5)+'</span>';
+    sub='<span class="g2 sw obs">'+T('measured')+' '+hm12(a)+'</span>';
   }else{
     const bt=s.end_utc?Math.floor(Date.parse(s.end_utc)/1000):null;
-    sub='<span class="g2 sw fc">'+T('forecast')+' '+fmtTZ(a,false).slice(-5)+
-        (bt?('–'+fmtTZ(bt,false).slice(-5)):'')+'</span>';
+    sub='<span class="g2 sw fc">'+T('forecast')+' '+hm12(a)+
+        (bt?('–'+hm12(bt)):'')+'</span>';
   }
   return '<span class="stp">'+day+' '+mon+'</span>'+sub;
 }
@@ -270,7 +285,7 @@ function ago(iso){
   if(m<2880)return T('ago_hr').replace('{n}',Math.round(m/60));
   return T('ago_day').replace('{n}',Math.round(m/1440));
 }
-function clock(iso){return iso?fmtTZ(Math.floor(Date.parse(iso)/1000),false).slice(-5):'\u2013';}
+function clock(iso){return iso?hm12(Math.floor(Date.parse(iso)/1000)):'\u2013';}
 
 /* The receipt: when every number on this page is from. Rendered client-side so
    it follows the UTC/AST toggle like everything else - a timestamp frozen in UTC

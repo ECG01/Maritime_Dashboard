@@ -47,6 +47,7 @@ XBUK	caricoos_mesonet	wind	1	17.7900	-64.6200	Buck Island	Cayo Buck	wspd,wdir,gu
 9757487	coops	tide	1	18.0059	-66.7666	Ponce	Ponce	wl,wl_pred	9757487	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9757487	prediction-only subordinate station; replaces Guayanilla, which publishes no tidal datum	-
 9755971	coops	tide	1	17.9491	-66.2259	Central Aguirre	Central Aguirre	wl,wl_pred	9755971	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9755971	prediction-only subordinate station; nearest tidal station to Salinas	-
 9759394	coops	tide	1	18.2188	-67.1624	Mayaguez	Mayaguez	wl,wl_pred	9759394	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9759394		-
+9759938	coops	tide	1	18.0893	-67.9382	Mona Island	Isla de Mona	wl,wl_pred	9759938	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9759938	real-time gauge plus predictions; nearest tidal station to the Mona Passage	-
 9751639	coops	tide	1	18.3306	-64.9258	Charlotte Amalie	Charlotte Amalie	wl,wl_pred	9751639	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9751639		-
 9751381	coops	tide	1	18.3183	-64.7242	Lameshur Bay, St. John	Bahia Lameshur, St. John	wl,wl_pred	9751381	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9751381	nearest gauge to Cruz Bay	-
 9751364	coops	tide	1	17.7477	-64.6984	Christiansted Harbor	Puerto de Christiansted	wl,wl_pred	9751364	6	3	https://tidesandcurrents.noaa.gov/stationhome.html?id=9751364		-
