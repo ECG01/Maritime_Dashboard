@@ -31,15 +31,27 @@ OPEN_PERIODS = 2
 CSS = r"""
 .zone{background:var(--panel);border:1px solid var(--line);border-radius:10px;
   margin-bottom:1rem;overflow:hidden}
-.zone .zh{display:flex;gap:.9rem;align-items:flex-start;padding:.75rem .9rem;
-  background:var(--controls);border-bottom:1px solid var(--line)}
+.zone .zh{display:flex;gap:.9rem;align-items:flex-start;padding:.7rem .9rem;
+  background:var(--controls)}
 .zone .zh .txt{flex:1;min-width:0}
 .zone .zh h3{margin:0;font:700 1rem "Archivo",sans-serif}
 .zone .zid{font:700 .78rem "JetBrains Mono",monospace;color:var(--teal);letter-spacing:.04em}
 .zone .sites{font-size:.85rem;color:var(--ink2);margin-top:.15rem}
-.cols{display:flex;gap:0;flex-wrap:wrap}
-.verb{flex:1 1 400px;min-width:300px;padding:.8rem .9rem;border-right:1px solid var(--line)}
-.ours{flex:0 1 290px;min-width:250px;padding:.8rem .9rem;background:var(--surface)}
+/* Numbers first, the forecaster's words behind a disclosure.
+   The old card led with four paragraphs of verbatim text and pushed the numbers
+   into a 290px side column, so ten zones came to 5,578px of mostly prose. The
+   text is not cut - nothing official may be - it is one click away, which is
+   where it belongs for a reader who came to compare wind and seas. */
+.nums{margin-top:.5rem}
+details.verbd{border-top:1px solid var(--line)}
+details.verbd>summary{cursor:pointer;list-style:none;padding:.55rem .9rem;
+  font:600 .86rem "Source Sans 3",sans-serif;color:var(--s1);background:var(--surface)}
+details.verbd>summary::-webkit-details-marker{display:none}
+details.verbd>summary::before{content:"\25B8 ";display:inline-block;transition:transform .12s}
+details.verbd[open]>summary::before{transform:rotate(90deg)}
+details.verbd>summary:hover{background:var(--sel)}
+.verb{padding:.3rem .9rem .8rem;background:var(--surface)}
+.zone>details.more{border-top:1px solid var(--line);padding:.55rem .9rem}
 .colh{font:700 .7rem "Archivo",sans-serif;letter-spacing:.07em;text-transform:uppercase;
   color:var(--ink2);margin-bottom:.45rem}
 .verb .colh{color:var(--s2)}
@@ -52,7 +64,7 @@ details.more summary{cursor:pointer;font:600 .84rem "Source Sans 3",sans-serif;
 details.more summary::-webkit-details-marker{display:none}
 details.more summary::before{content:"\25B8 ";display:inline-block;transition:transform .12s}
 details.more[open] summary::before{transform:rotate(90deg)}
-table.sum{width:100%;border-collapse:collapse;font-size:.86rem}
+table.sum{width:100%;border-collapse:collapse;font-size:.9rem;max-width:760px}
 table.sum th{text-align:left;font:600 .68rem "Archivo",sans-serif;text-transform:uppercase;
   letter-spacing:.05em;color:var(--ink2);padding:.2rem .25rem;border-bottom:1px solid var(--line)}
 table.sum td{padding:.2rem .25rem;border-bottom:1px solid var(--grid);
@@ -129,7 +141,6 @@ table.beach td.s{font-variant-numeric:tabular-nums;white-space:nowrap}
   table.beach td.b,table.beach th.b{display:none}
 }
 @media (max-width:820px){
-  .verb{border-right:0;border-bottom:1px solid var(--line)}
   .zone .zh{flex-wrap:wrap}
   .locator{width:104px}.locator svg{width:104px}
 }
@@ -408,21 +419,23 @@ def main():
     {locator(geo, z)}
     <div class="txt"><span class="zid">{z}</span>
       <h3>{html.escape(zd.get("name", ""))}</h3>
-      <div class="sites">{sitelist}</div></div>
+      <div class="sites">{sitelist}</div>
+    <div class="nums"><div class="colh">{M.bi(
+      "Summary of the Numbers", "Resumen de los números")}</div>
+    <table class="sum"><thead><tr>
+      <th>{M.bi("Period", "Periodo")}</th><th>{M.bi("Wind", "Viento")}</th>
+      <th>{M.bi("Gust", "Ráfaga")}</th>
+      <th>{M.bi("Seas", "Oleaje")}</th><th>{M.bi("Per.", "Per.")}</th>
+    </tr></thead><tbody>{rows}</tbody></table>{nota}</div></div>
   </div>
-  <div class="cols">
+  <details class="verbd"><summary>{M.bi(
+      "Read the forecaster&rsquo;s own words",
+      "Leer las palabras del meteorólogo")}</summary>
     <div class="verb"><div class="colh">{M.bi(
         "National Weather Service &mdash; as issued",
         "Servicio Nacional de Meteorología &mdash; tal como se emitió")}</div>
-      {per_html(head)}{more}</div>
-    <div class="ours"><div class="colh">{M.bi(
-        "Summary of the Numbers", "Resumen de los números")}</div>
-      <table class="sum"><thead><tr>
-        <th>{M.bi("Period", "Periodo")}</th><th>{M.bi("Wind", "Viento")}</th>
-        <th>{M.bi("Gust", "Ráfaga")}</th>
-        <th>{M.bi("Seas", "Oleaje")}</th><th>{M.bi("Per.", "Per.")}</th>
-      </tr></thead><tbody>{rows}</tbody></table>{nota}</div>
-  </div>
+      {per_html(head)}</div></details>
+  {more}
 </div>""")
 
     if alerts:

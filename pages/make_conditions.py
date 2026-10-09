@@ -90,6 +90,13 @@ I18N = {
     # NOT that the wind is steady. The CWF only mentions gusts when they are
     # notable - currently about a third of periods - so saying "0" there would be
     # inventing data.
+    "fcnote": {"en": "No instrument is reporting this value here right now, so it "
+                     "comes from the National Weather Service zone forecast. "
+                     "Everything unmarked is measured.",
+               "es": "Aqui no hay instrumento reportando este valor ahora mismo, "
+                     "asi que viene del pronostico de zona del Servicio Nacional "
+                     "de Meteorologia. Todo lo no marcado es medido."},
+    "readat": {"en": "Read at", "es": "Leido a las"},
     "nogust": {"en": "Not published for this period", "es": "No publicada para este periodo"},
     "allclear": {"en": "All clear for {c}", "es": "Todo despejado para {c}"},
     "allclearsub": {"en": "All {n} locations are within every published limit.",
@@ -133,29 +140,47 @@ CSS = r"""
   border-color:var(--btn-on)}
 
 
-table.board{width:100%;border-collapse:collapse;background:var(--panel);
-  border:1px solid var(--line);border-radius:10px;overflow:hidden}
-table.board th{background:var(--controls);font:600 .74rem "Archivo",sans-serif;
-  letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);padding:.55rem .7rem;
-  text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
-table.board td{padding:.6rem .7rem;border-bottom:1px solid var(--grid);vertical-align:middle}
-table.board tr.grp td{background:var(--controls);font:700 .78rem "Archivo",sans-serif;
-  letter-spacing:.06em;text-transform:uppercase;color:var(--navy);padding:.4rem .7rem}
-table.board tr.site{cursor:pointer}
-table.board tr.site:hover{background:var(--sel)}
-table.board tr.site td:first-child{border-left:5px solid transparent;font-weight:600}
-tr.site.favorable td:first-child{border-left-color:var(--ok)}
-tr.site.marginal td:first-child{border-left-color:var(--warn)}
-tr.site.unfavorable td:first-child{border-left-color:var(--flag)}
-tr.site.nodata td:first-child,tr.site.notrated td:first-child{border-left-color:var(--line)}
+/* One band per location instead of a seven-column grid. A table makes you
+   cross a row against a header you left behind at the top of the screen; a band
+   puts the label next to its own number. Nothing is colour-coded by threshold -
+   that would be the suitability verdict under another name. */
+.grp{font:700 .76rem "Archivo",sans-serif;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--navy);margin:.85rem 0 .3rem;padding:0 .15rem}
+.grp:first-of-type{margin-top:.3rem}
+.band{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:.45rem .9rem;margin-bottom:.3rem;cursor:pointer;
+  display:flex;align-items:center;gap:1rem;
+  transition:background .12s,border-color .12s}
+.band:hover{background:var(--sel);border-color:var(--teal)}
+.band:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.band.open{border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0}
+.bname{font:700 .98rem "Archivo",sans-serif;line-height:1.2;
+  flex:0 0 15rem;min-width:0}
+.bmetrics{flex:1 1 auto;display:grid;gap:.2rem 1.5rem;
+  grid-template-columns:repeat(3,minmax(0,1fr))}
+.bm{min-width:8.5rem}
+.bl{display:block;font:700 .64rem "Archivo",sans-serif;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink2)}
+.bv{font-variant-numeric:tabular-nums;font-size:1.08rem;font-weight:600;
+  display:block;line-height:1.22}
+.bv i{font-style:normal;color:var(--ink2);font-weight:400;font-size:.88rem}
+.bv em{font-style:normal;color:var(--ink2);font-weight:400;font-size:.84rem;
+  white-space:nowrap}
+.bv .stp{font-size:1.12rem;font-weight:600}
+.bv .sw{font-size:.84rem;font-weight:400}
+/* The exception, marked. Not colour - a dagger and a footnote, because a red
+   number here would read as a severity rating we are not making. */
+.fcm{display:block;font-style:normal;font-size:.8rem;color:var(--ink2);
+  cursor:help;font-weight:400;white-space:nowrap;line-height:1.3}
+.fcnote{font-size:.84rem;color:var(--ink2);margin:.7rem 0 0;max-width:72ch;line-height:1.5}
 .vd{display:flex;flex-direction:column;gap:.15rem;align-items:flex-start}
 .vd .why{font-size:.84rem;color:var(--ink2)}
 .num{font-variant-numeric:tabular-nums;white-space:nowrap;font-size:.98rem}
 .arrow{display:inline-block;color:var(--ink2)}
 .g2{color:var(--ink2);font-size:.82rem}
 .stp{display:block;font-variant-numeric:tabular-nums}
-td.when{white-space:nowrap}
-td.when .stp{font-weight:600}
+.when{white-space:nowrap}
+.when .stp{font-weight:600}
 .sw{display:block;font-size:.8rem}
 .sw.ok{color:var(--ok)}
 .sw.warn{color:var(--warn)}
@@ -181,7 +206,8 @@ td.when .stp{font-weight:600}
   background:var(--warn);color:var(--warn-ink);font-size:.88rem}
 @media (max-width:760px){.stamp-in .tzl{margin-left:0}}
 
-.drawer td{background:var(--surface);padding:.9rem 1rem}
+.drawer{background:var(--surface);border:1px solid var(--line);border-top:0;
+  border-radius:0 0 10px 10px;padding:.9rem 1rem;margin:0 0 .4rem}
 .drawer h4{margin:0 0 .3rem;font:700 .74rem "Archivo",sans-serif;text-transform:uppercase;
   letter-spacing:.06em;color:var(--ink2)}
 .drawer .cols{display:flex;gap:1.3rem;flex-wrap:wrap}
@@ -197,16 +223,15 @@ td.when .stp{font-weight:600}
 .btn2:hover{background:var(--sel)}
 .lead{max-width:66ch}
 
-/* phone: the table becomes stacked cards, because a 6-column table on a
-   flybridge is unreadable */
-@media (max-width:760px){
-  table.board thead{display:none}
-  table.board,table.board tbody,table.board tr,table.board td{display:block;width:100%}
-  table.board tr.site{border-bottom:1px solid var(--line);padding:.2rem 0}
-  table.board tr.site td{border-bottom:0;padding:.25rem .8rem}
-  table.board tr.site td:first-child{font-size:1.05rem;padding-top:.6rem}
-  table.board td.m::before{content:attr(data-l) " ";color:var(--ink2);font-size:.8rem;
-    text-transform:uppercase;letter-spacing:.04em}
+/* phone: the band already stacks, so this only tightens the gaps. The old
+   table needed a whole second layout here; the band does not. */
+@media (max-width:860px){
+  /* Below this the name no longer fits beside the numbers, so the band
+     stacks - the same band, not a second layout. */
+  .band{display:block;padding:.55rem .9rem}
+  .bname{margin-bottom:.2rem}
+  .bmetrics{display:flex;flex-wrap:wrap;gap:.25rem 1.4rem}
+  .bm{min-width:7.5rem}
   .head h2{font-size:1.15rem}
 }
 """
@@ -272,6 +297,9 @@ function whenCell(s){
   }
   return '<span class="stp">'+day+' '+mon+'</span>'+sub;
 }
+/* 16-point bearing. A mariner reads "ENE", not "67 degrees". */
+const CMP=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+function compass(deg){return deg==null?'':CMP[Math.round(((deg%360)+360)%360/22.5)%16];}
 function dirArrow(deg){
   if(deg==null)return '';
   return '<span class="arrow" style="display:inline-block;transform:rotate('+
@@ -312,52 +340,66 @@ function renderStamp(){
   return h;
 }
 
+function met(label,val){
+  return '<div class="bm"><span class="bl">'+label+'</span>'+
+         '<span class="bv">'+val+'</span></div>';
+}
+
 function render(){
   document.getElementById('stamp').innerHTML=renderStamp();
-  let h='<thead><tr>'+
-        '<th title="'+T('whenhelp')+'">'+T('when')+'</th>'+
-        '<th>'+T('site')+'</th>'+
-        '<th>'+T('wind')+'</th><th>'+T('gust')+'</th><th>'+T('seas')+'</th>'+
-        '<th>'+T('period')+'</th>'+
-        '<th title="'+T('tidehelp')+'">'+T('tide')+'</th></tr></thead><tbody>';
+  let h='', anyFc=false;
   D.groups.forEach(g=>{
-    h+='<tr class="grp"><td colspan="7">'+nm(g)+'</td></tr>';
-    D.sites.filter(s=>s.group===g.key).forEach(s=>{
-      /* Say where each group of numbers came from, in the cell itself. Wind and
-         waves resolve independently, so one row can legitimately mix a measured
-         wind with a forecast sea. */
+    const mine=D.sites.filter(s=>s.group===g.key);
+    if(!mine.length)return;
+    h+='<div class="grp">'+nm(g)+'</div>';
+    mine.forEach(s=>{
       const pw=s.prov?s.prov.wind:null, pv=s.prov?s.prov.wave:null;
-      const tag=pr=>{
-        if(!pr)return '';
-        return pr.observed
-          ? '<span class="g2 sw obs" title="'+T('obshelp').replace('{s}',pr.src)
-              .replace('{a}',Math.round(pr.age_min))+'">'+
-              T('obsfrom').replace('{s}',pr.src)+'</span>'
-          : '<span class="g2 sw fc" title="'+T('fchelp')+'">'+T('fcfrom')+'</span>';
+      /* Mark only the EXCEPTION. The old board printed "measured - XSNF" under
+         every number, which buried the handful that were NOT measured - the one
+         distinction on this page that changes what a number means.
+         This was a superscript dagger and it read as a SECOND direction arrow
+         beside the wave arrow - the worst possible confusion here. It says the
+         words now, and it sits after the direction, not between the two. */
+      const mark=pr=>{
+        if(!pr||pr.observed)return '';
+        anyFc=true;
+        return ' <em class="fcm" title="'+T('fchelp')+'">'+T('fcfrom')+'</em>';
       };
-      const w=s.wind_kt==null?'–':(dirArrow(s.wdir)+fv('kt',s.wind_kt,0))+tag(pw);
-      const gust=s.gust_kt==null
-        ? '<span class="g2" title="'+T('nogust')+'">–</span>'
-        : fv('kt',s.gust_kt,0);
-      const tide=tideCell(s.tide);
-      const when=whenCell(s);
-      const sea=s.hs_m==null?'–':(dirArrow(s.dp)+fv('m',s.hs_m,1))+tag(pv);
-      const tp=s.tp_s==null?'–':fv('s',s.tp_s,0);
-      h+='<tr class="site" id="r_'+s.id+'" data-t="'+s.id+'">'+
-         '<td class="m when" data-l="'+T('when')+'">'+when+'</td>'+
-         '<td>'+nm(s)+'</td>'+
-         '<td class="num m" data-l="'+T('wind')+'">'+w+'</td>'+
-         '<td class="num m" data-l="'+T('gust')+'">'+gust+'</td>'+
-         '<td class="num m" data-l="'+T('seas')+'">'+sea+'</td>'+
-         '<td class="num m" data-l="'+T('period')+'">'+tp+'</td>'+
-         '<td class="num m" data-l="'+T('tide')+'">'+tide+'</td></tr>'+
-         '<tr class="drawer" id="d_'+s.id+'" hidden><td colspan="7">'+drawer(s)+'</td></tr>';
+      const wind = s.wind_kt==null ? '\u2013'
+        : dirArrow(s.wdir)+fv('kt',s.wind_kt,0)+
+          (s.wdir!=null?' <i>'+compass(s.wdir)+'</i>':'')+mark(pw)+
+          (s.gust_kt!=null
+            ? ' <em>'+T('gust').toLowerCase()+' '+fv('kt',s.gust_kt,0)+'</em>'
+            : '');
+      const sea = s.hs_m==null ? '\u2013'
+        : dirArrow(s.dp)+fv('m',s.hs_m,1)+
+          (s.tp_s!=null?' <i>'+fv('s',s.tp_s,0)+'</i>':'')+
+          (s.dp!=null?' <i>'+compass(s.dp)+'</i>':'')+mark(pv);
+      h+='<div class="band" id="r_'+s.id+'" data-t="'+s.id+'" '+
+             'tabindex="0" role="button" aria-expanded="false" '+
+             'aria-controls="d_'+s.id+'">'+
+         '<div class="bname">'+nm(s)+'</div>'+
+         '<div class="bmetrics">'+
+           met(T('wind'),wind)+met(T('seas'),sea)+met(T('tide'),tideCell(s.tide))+
+         '</div></div>'+
+         '<div class="drawer" id="d_'+s.id+'" hidden>'+drawer(s)+'</div>';
     });
   });
-  document.getElementById('board').innerHTML=h+'</tbody>';
-  document.querySelectorAll('tr.site').forEach(tr=>{
-    tr.onclick=()=>{const d=document.getElementById('d_'+tr.dataset.t);d.hidden=!d.hidden;};
+  if(anyFc) h+='<p class="fcnote">'+T('fcnote')+'</p>';
+  document.getElementById('board').innerHTML=h;
+  const toggle=el=>{
+    const d=document.getElementById('d_'+el.dataset.t);
+    d.hidden=!d.hidden;
+    el.classList.toggle('open',!d.hidden);
+    el.setAttribute('aria-expanded', d.hidden?'false':'true');
+  };
+  document.querySelectorAll('.band').forEach(el=>{
+    el.onclick=()=>toggle(el);
+    el.onkeydown=e=>{
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle(el);}
+    };
   });
+
 }
 
 function drawer(s){
@@ -366,7 +408,9 @@ function drawer(s){
   let h='<div class="cols"><div class="col"><h4>'+T('fcst')+'</h4>'+
     '<div class="fcsttext"><b>'+s.zone+'</b> · '+(s.period_label||'')+'<br>'+
     '<span class="g2">'+(s.period_text||'')+'</span></div></div>'+
-    '<div class="col"><h4>'+T('stations')+'</h4><div class="g2">'+
+    '<div class="col"><h4>'+T('stations')+'</h4>'+
+    '<div class="g2 when" style="margin-bottom:.35rem">'+whenCell(s)+'</div>'+
+    '<div class="g2">'+
     T('seas')+': '+srcs(s.obs_wave)+'<br>'+T('wind')+': '+srcs(s.obs_wind)+'</div>'+
     (s.notes_en?('<div class="g2" style="margin-top:.4rem">'+
       (L==='es'?s.notes_es:s.notes_en)+'</div>'):'')+'</div></div>';
@@ -628,7 +672,7 @@ def main():
 <div id="stamp" class="stamp"></div>
 <div id="pollnote" class="pollnote"></div>
 <div id="nws" class="nws"></div>
-<table class="board" id="board"></table>
+<div id="board"></div>
 <p class="hint">{M.bi("Tap a row to see the forecast behind it and open the CARICOOS tool "
                       "for that location.",
                       "Toque una fila para ver el pronóstico detrás y abrir la herramienta "
