@@ -394,6 +394,8 @@ CHAT_CSS = r"""
 .msg.bot{align-self:flex-start;background:var(--surface);border:1px solid var(--line)}
 .msg.err{align-self:flex-start;background:var(--flag);color:#fff}
 .msg.think{align-self:flex-start;color:var(--ink2);font-style:italic}
+.msg.sep{align-self:center;max-width:100%;padding:.2rem;color:var(--ink2);
+  font-size:.76rem;text-align:center;background:none}
 .msg.bot a{color:var(--s1);text-decoration:underline;word-break:break-word}
 .msg.bot a:hover{color:var(--teal)}
 .chatfoot{border-top:1px solid var(--line);padding:.55rem;display:flex;gap:.4rem}
@@ -451,6 +453,15 @@ def chat_widget(env):
 (function(){
   const URL_=%s;
   const KEY='maritime_chat_key', HIST=[];
+  /* La conversacion sobrevive al cambio de panel. Cada panel es una carga de
+     pagina completa, asi que sin esto HIST se vaciaba y el bot perdia el hilo:
+     preguntar "y manana?" despues de cambiar de pestana ya no funcionaba.
+
+     sessionStorage y no localStorage a proposito. Las respuestas citan numeros
+     de UNA lectura del tablero; una conversacion de ayer reapareciendo con
+     cifras viejas es justo lo que este proyecto no hace. sessionStorage muere
+     con la pestana, que es la vida util correcta para esto. */
+  const SKEY='maritime_chat_session';
   const wrap=document.getElementById('chatwrap'), log=document.getElementById('chatlog'),
         inp=document.getElementById('chatin'), send=document.getElementById('chatsend'),
         chips=document.getElementById('chatchips');
@@ -557,12 +568,36 @@ def chat_widget(env):
       else {
         add(d.answer,'bot');
         HIST.push({role:'user',content:q},{role:'assistant',content:d.answer});
+        save();
       }
     }catch(e){
       pending.remove();
       add(T2('Could not reach the assistant.','No se pudo contactar al asistente.'),'err');
     }
     send.disabled=false; inp.focus();
+  }
+  function save(){
+    try{ sessionStorage.setItem(SKEY, JSON.stringify(
+      {open: wrap.classList.contains('on'), hist: HIST.slice(-16)})); }catch(e){}
+  }
+  function restore(){
+    let st=null;
+    try{ st=JSON.parse(sessionStorage.getItem(SKEY)||'null'); }catch(e){}
+    if(!st) return;
+    if(st.hist && st.hist.length){
+      add(greeting(),'bot');
+      st.hist.forEach(function(m){
+        HIST.push(m);
+        add(m.content, m.role==='user'?'me':'bot');
+      });
+      /* Esas respuestas citaron la lectura que estaba en pantalla entonces, y
+         el tablero se refresca cada diez minutos. Decirlo cuesta una linea. */
+      const d=document.createElement('div'); d.className='msg sep';
+      d.textContent=T2('\u2014 earlier in this visit; the board may have refreshed since \u2014',
+                       '\u2014 antes en esta visita; el tablero pudo haberse actualizado \u2014');
+      log.appendChild(d); log.scrollTop=log.scrollHeight;
+    }
+    if(st.open){ wrap.classList.add('on'); if(!log.childElementCount){ add(greeting(),'bot'); suggestions(); } }
   }
   function greeting(){
     return T2('Ask me about the conditions on this board. I answer from the measurements shown here and say which station each number came from.',
@@ -571,10 +606,11 @@ def chat_widget(env):
   document.getElementById('askbtn').onclick=()=>{
     wrap.classList.add('on');
     if(!log.childElementCount){ add(greeting(),'bot'); suggestions(); }
-    inp.focus();
+    save(); inp.focus();
   };
-  document.getElementById('chatx').onclick=()=>wrap.classList.remove('on');
+  document.getElementById('chatx').onclick=()=>{ wrap.classList.remove('on'); save(); };
   labels();
+  restore();
   /* follow the page language toggle */
   const prevOnLang = typeof onLang==='function' ? onLang : null;
   window.onLang=function(){
