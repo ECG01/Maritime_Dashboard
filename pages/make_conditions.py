@@ -53,16 +53,21 @@ I18N = {
     "hi": {"en": "High", "es": "Marea alta"}, "lo": {"en": "Low", "es": "Marea baja"},
     # The observed level and the high/low times come from DIFFERENT CO-OPS
     # products: one is what the gauge reads, the other is astronomical
-    # prediction. Labelled separately on purpose - showing a prediction as a
-    # measurement is the quiet kind of error that matters for clearance.
+    # prediction. The page never prints the predicted LEVEL beside the measured
+    # one - see the note in tideCell.
     "tideobs": {"en": "measured {v}", "es": "medido {v}"},
     "tidenow": {"en": "Now", "es": "Ahora"},
+    "rising": {"en": "rising", "es": "subiendo"},
+    "falling": {"en": "falling", "es": "bajando"},
+    "turning": {"en": "turning", "es": "cambiando"},
+    "trendhelp": {"en": "Inferred from the next predicted high or low, not from a measured series. Within 30 minutes of the turn it reads “turning”, because the level barely moves there.",
+                  "es": "Deducido de la próxima pleamar o bajamar prevista, no de una serie medida. A menos de 30 minutos del cambio dice “cambiando”, porque ahí el nivel casi no se mueve."},
     "tidenext": {"en": "Next", "es": "Próxima"},
+    "tidethen": {"en": "Then", "es": "Luego"},
     "nogauge": {"en": "no live gauge here — prediction only",
                 "es": "sin sensor en vivo aquí — solo predicción"},
-    "tidenexthelp": {"en": "The next high or low water and the level it reaches, from NOAA astronomical prediction",
-                     "es": "La próxima pleamar o bajamar y el nivel que alcanza, de la predicción astronómica de NOAA"},
-    "tidepred": {"en": "predicted {v}", "es": "previsto {v}"},
+    "tidenexthelp": {"en": "When the next high or low water falls, from NOAA astronomical prediction. The level it reaches is not shown: it is a prediction, while the level above is a measurement, and the two need not agree.",
+                     "es": "Cuándo cae la próxima pleamar o bajamar, de la predicción astronómica de NOAA. No se muestra el nivel que alcanza: es una predicción, mientras que el nivel de arriba es una medición, y no tienen por qué coincidir."},
     "tideobshelp": {"en": "Water level measured by the gauge right now, above MLLW",
                     "es": "Nivel del agua medido por el mareógrafo ahora, sobre MLLW"},
     "tidepredhelp": {"en": "Predicted water level at that high or low, above MLLW. This "
@@ -161,6 +166,8 @@ tr.site.nodata td:first-child,tr.site.notrated td:first-child{border-left-color:
 .g2{color:var(--ink2);font-size:.82rem}
 .num .per{font-style:normal;color:var(--ink2);font-weight:400;font-size:.86rem;
   margin-left:.15rem}
+.num .per .at{margin:0 .22rem 0 0}
+.trend{font-weight:400;color:var(--ink2);font-size:.86rem;cursor:help}
 .stp{display:block;font-variant-numeric:tabular-nums}
 td.when{white-space:nowrap}
 td.when .stp{font-weight:600}
@@ -244,25 +251,72 @@ function hm12(epoch){
    entonces. Vienen de productos CO-OPS distintos - uno es medicion, el otro es
    prediccion astronomica - y un tercio de estas estaciones son solo prediccion,
    sin sensor. Por eso cada renglon dice que es. */
+/* Subiendo o bajando sale del TIPO del proximo evento, no de una serie: si lo
+   que viene es pleamar, la marea sube. CO-OPS aqui publica solo el nivel actual
+   y las pleamares/bajamares, sin serie intermedia, pero la marea es
+   astronomica y esa inferencia es exacta.
+
+   Cerca de la vuelta no se dice ninguna de las dos. En el entorno del cambio el
+   nivel apenas se mueve y llamarlo "subiendo" seria tecnicamente cierto y
+   practicamente falso para quien calcula un calado. */
+const SLACK_MIN = 30;
+/* La primera prediccion que todavia no ha ocurrido. La pagina se arma cada diez
+   minutos y puede quedar abierta horas, asi que la primera de la lista se vuelve
+   pasado sin que nadie recargue. */
+function futureTides(t){
+  const ps = (t && t.preds) || (t && t.next ? [t.next] : []);
+  const now = Date.now();
+  return ps.filter(q => Date.parse(q.t) > now);
+}
+function nextTide(t){ return futureTides(t)[0] || null; }
+function tideTrend(t){
+  const nx = nextTide(t);
+  if(!nx) return '';
+  const mins = (Date.parse(nx.t) - now_())/60000;
+  if(mins <= SLACK_MIN) return T('turning');
+  return nx.type==='H' ? T('rising') : T('falling');
+}
+function now_(){return Date.now();}
 function tideCell(t){
   if(!t)return '<span class="g2" title="'+T('notide')+'">–</span>';
   let h='';
   if(t.observed!=null){
+    const tr=tideTrend(t);
     h+='<span class="stp" title="'+T('tideobshelp')+'">'+T('tidenow')+' '+
-       fv('m',t.observed,1)+'</span>';
+       fv('m',t.observed,1)+
+       (tr?('<span class="trend" title="'+T('trendhelp')+'"> \u00b7 '+tr+'</span>'):'')+
+       '</span>';
   }
-  if(t.next){
-    const when=Math.floor(Date.parse(t.next.t)/1000);
-    /* Solo la hora: la proxima pleamar o bajamar cae siempre dentro de unas
-       doce horas, asi que la fecha seria ruido en una columna que se escanea. */
-    const lvl = t.next.v!=null ? (' \u00b7 '+fv('m',t.next.v,1)) : '';
+  const nx=nextTide(t);
+  if(nx){
+    const when=Math.floor(Date.parse(nx.t)/1000);
+    /* Solo la hora y el tipo. NO el nivel previsto, y esto es deliberado:
+       el nivel de "Ahora" es una MEDICION y el de la proxima pleamar es
+       PREDICCION ASTRONOMICA, de productos CO-OPS distintos que no tienen por
+       que coincidir. Con viento, marejada o presion baja el nivel medido se
+       pone por encima de la pleamar prevista, y entonces la celda decia
+       "Ahora 2.2 ft, subiendo / Proxima pleamar 1.9 ft": subiendo hacia un
+       numero mas bajo. Al quitarlo, 4 de las 8 estaciones con sensor tenian
+       esa contradiccion en pantalla.
+
+       Tampoco la fecha: la proxima vuelta cae siempre dentro de unas doce
+       horas, asi que seria ruido en una columna que se escanea. */
     h+='<span class="'+(t.observed!=null?'g2 sw':'stp')+'" title="'+
        T('tidenexthelp')+'">'+T('tidenext')+' '+
-       (t.next.type==='H'?T('hi'):T('lo'))+' '+hm12(when)+lvl+'</span>';
+       (nx.type==='H'?T('hi'):T('lo'))+' '+hm12(when)+'</span>';
+    /* La segunda solo donde hay sensor. Esas filas ya traen nivel y sentido, y
+       con dos vueltas por delante se puede planificar una salida y un regreso;
+       en una estacion de solo prediccion seria una fila mas alta sin el dato
+       que la hace util. */
+    const after = t.observed!=null ? futureTides(t)[1] : null;
+    if(after)
+      h+='<span class="g2 sw" title="'+T('tidenexthelp')+'">'+T('tidethen')+' '+
+         (after.type==='H'?T('hi'):T('lo'))+' '+
+         hm12(Math.floor(Date.parse(after.t)/1000))+'</span>';
   }
   /* Sin sensor no hay "ahora". Decirlo, en vez de dejar el hueco y que parezca
      que el dato se perdio. */
-  if(t.observed==null && t.next)
+  if(t.observed==null && nx)
     h+='<span class="g2 sw" title="'+T('tidepredhelp')+'">'+T('nogauge')+'</span>';
   return h||'–';
 }
@@ -373,7 +427,8 @@ function render(){
          Se declara ANTES de sea: const vive en zona muerta temporal y usarlo
          una linea antes lanza ReferenceError, que en esta pagina se traduce en
          una tabla vacia sin nada en pantalla que diga por que. */
-      const per=s.tp_s==null?'':' <i class="per">'+fv('s',s.tp_s,0)+'</i>';
+      const per=s.tp_s==null?''
+        : ' <i class="per"><span class="at">@</span>'+fv('s',s.tp_s,0)+'</i>';
       /* Y va pegado a la altura, ANTES de la linea de procedencia: tag() es
          display:block, asi que despues caia a otro renglon y se leia como si
          el periodo viniera de otra fuente. */
@@ -578,18 +633,22 @@ def merge_obs(site, fc, obs):
 def tide_for(site, tides):
     """The tide readout for one site, or None when it has no tidal station.
 
-    Only the NEXT high/low is carried to the page - a mariner glancing at a board
-    wants "High 18:42", not a table of four. The full list stays in the payload's
-    source file for anything later.
+    Where there is a gauge the page shows the next TWO high/lows; where there is
+    only prediction it shows one. All four the fetcher holds are carried, and
+    the page picks the ones still ahead - the page is rebuilt every ten minutes
+    and sits open for hours, so carrying just one meant the board kept showing a
+    "next" tide that had already happened, and the rising/falling read went
+    blank exactly when the turn made it interesting.
     """
     sid = site.get("tide")
     st = tides.get(sid) if sid else None
     if not st:
         return None
-    nxt = st["predictions"][0] if st.get("predictions") else None
-    if nxt is None and st.get("observed") is None:
+    preds = (st.get("predictions") or [])[:4]
+    if not preds and st.get("observed") is None:
         return None
-    return {"station": sid, "observed": st.get("observed"), "next": nxt}
+    return {"station": sid, "observed": st.get("observed"),
+            "next": preds[0] if preds else None, "preds": preds}
 
 
 def main():
