@@ -31,7 +31,7 @@ I18N = {
     "seas": {"en": "Seas from", "es": "Oleaje de"},
     "period": {"en": "Wave period", "es": "Periodo"},
     "gust": {"en": "Gust", "es": "Ráfaga"},
-    "tide": {"en": "Next tide", "es": "Próxima marea"},
+    "tide": {"en": "Tide", "es": "Marea"},
     "obsfrom": {"en": "measured \u00b7 {s}", "es": "medido \u00b7 {s}"},
     "fcfrom": {"en": "NWS forecast", "es": "pronóstico NWS"},
     "obshelp": {"en": "Measured by station {s}, {a} min ago",
@@ -56,6 +56,12 @@ I18N = {
     # prediction. Labelled separately on purpose - showing a prediction as a
     # measurement is the quiet kind of error that matters for clearance.
     "tideobs": {"en": "measured {v}", "es": "medido {v}"},
+    "tidenow": {"en": "Now", "es": "Ahora"},
+    "tidenext": {"en": "Next", "es": "Próxima"},
+    "nogauge": {"en": "no live gauge here — prediction only",
+                "es": "sin sensor en vivo aquí — solo predicción"},
+    "tidenexthelp": {"en": "The next high or low water and the level it reaches, from NOAA astronomical prediction",
+                     "es": "La próxima pleamar o bajamar y el nivel que alcanza, de la predicción astronómica de NOAA"},
     "tidepred": {"en": "predicted {v}", "es": "previsto {v}"},
     "tideobshelp": {"en": "Water level measured by the gauge right now, above MLLW",
                     "es": "Nivel del agua medido por el mareógrafo ahora, sobre MLLW"},
@@ -153,6 +159,8 @@ tr.site.nodata td:first-child,tr.site.notrated td:first-child{border-left-color:
 .num{font-variant-numeric:tabular-nums;white-space:nowrap;font-size:.98rem}
 .arrow{display:inline-block;color:var(--ink2)}
 .g2{color:var(--ink2);font-size:.82rem}
+.num .per{font-style:normal;color:var(--ink2);font-weight:400;font-size:.86rem;
+  margin-left:.15rem}
 .stp{display:block;font-variant-numeric:tabular-nums}
 td.when{white-space:nowrap}
 td.when .stp{font-weight:600}
@@ -231,22 +239,31 @@ function hm12(epoch){
   h = h%12 || 12;          /* medianoche -> 12 AM, mediodia -> 12 PM */
   return h+':'+s.slice(3)+'\u202f'+ap;
 }
+/* Dos cosas distintas, y antes se mezclaban en el mismo renglon: el nivel que
+   el sensor lee AHORA, y la proxima pleamar o bajamar con el nivel que tendra
+   entonces. Vienen de productos CO-OPS distintos - uno es medicion, el otro es
+   prediccion astronomica - y un tercio de estas estaciones son solo prediccion,
+   sin sensor. Por eso cada renglon dice que es. */
 function tideCell(t){
   if(!t)return '<span class="g2" title="'+T('notide')+'">–</span>';
   let h='';
+  if(t.observed!=null){
+    h+='<span class="stp" title="'+T('tideobshelp')+'">'+T('tidenow')+' '+
+       fv('m',t.observed,1)+'</span>';
+  }
   if(t.next){
     const when=Math.floor(Date.parse(t.next.t)/1000);
-    /* Just the clock time: the next high or low is always within about twelve
-       hours, so the date is noise in a column people scan. */
-    const hhmm=hm12(when);
-    h+='<span class="stp">'+(t.next.type==='H'?T('hi'):T('lo'))+' '+hhmm+'</span>';
+    /* Solo la hora: la proxima pleamar o bajamar cae siempre dentro de unas
+       doce horas, asi que la fecha seria ruido en una columna que se escanea. */
+    const lvl = t.next.v!=null ? (' \u00b7 '+fv('m',t.next.v,1)) : '';
+    h+='<span class="'+(t.observed!=null?'g2 sw':'stp')+'" title="'+
+       T('tidenexthelp')+'">'+T('tidenext')+' '+
+       (t.next.type==='H'?T('hi'):T('lo'))+' '+hm12(when)+lvl+'</span>';
   }
-  if(t.observed!=null)
-    h+='<span class="g2 sw" title="'+T('tideobshelp')+'">'+
-       T('tideobs').replace('{v}',fv('m',t.observed,1))+'</span>';
-  else if(t.next)
-    h+='<span class="g2 sw" title="'+T('tidepredhelp')+'">'+
-       T('tidepred').replace('{v}',fv('m',t.next.v,1))+'</span>';
+  /* Sin sensor no hay "ahora". Decirlo, en vez de dejar el hueco y que parezca
+     que el dato se perdio. */
+  if(t.observed==null && t.next)
+    h+='<span class="g2 sw" title="'+T('tidepredhelp')+'">'+T('nogauge')+'</span>';
   return h||'–';
 }
 const MON={en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
@@ -286,6 +303,13 @@ function ago(iso){
   return T('ago_day').replace('{n}',Math.round(m/1440));
 }
 function clock(iso){return iso?hm12(Math.floor(Date.parse(iso)/1000)):'\u2013';}
+/* Dia, mes y ano en la zona activa, no en la del navegador: TZOFF() es el mismo
+   desplazamiento que usa fmtTZ, asi que la fecha acompana al boton UTC/AST. */
+function fullDate(iso){
+  if(!iso)return '\u2013';
+  const d=new Date((Math.floor(Date.parse(iso)/1000)+TZOFF())*1000);
+  return d.getUTCDate()+' '+(MON[L]||MON.en)[d.getUTCMonth()]+' '+d.getUTCFullYear();
+}
 
 /* The receipt: when every number on this page is from. Rendered client-side so
    it follows the UTC/AST toggle like everything else - a timestamp frozen in UTC
@@ -296,7 +320,10 @@ function renderStamp(){
   const stale=mins>45;
   let h='<div class="stamp-in'+(stale?' stale':'')+'">'+
         '<span class="lab">'+T('asof')+'</span>';
-  h+='<span class="it"><b>'+T('fc_issued')+'</b> '+clock(D.cwf_issued)+
+  /* Con la hora sola no se sabia si el pronostico era de hoy: habia que bajar
+     hasta el pie de pagina a mirar el sello. Lleva dia, mes y ano. */
+  h+='<span class="it"><b>'+T('fc_issued')+'</b> '+fullDate(D.cwf_issued)+
+     ' \u00b7 '+clock(D.cwf_issued)+
      (D.valid_from?(' \u00b7 '+T('fc_valid')+' '+clock(D.valid_from)+'\u2013'+
       clock(D.valid_to)):'')+'</span>';
   if(D.obs_fetched)
@@ -318,10 +345,9 @@ function render(){
         '<th title="'+T('whenhelp')+'">'+T('when')+'</th>'+
         '<th>'+T('site')+'</th>'+
         '<th>'+T('wind')+'</th><th>'+T('gust')+'</th><th>'+T('seas')+'</th>'+
-        '<th>'+T('period')+'</th>'+
         '<th title="'+T('tidehelp')+'">'+T('tide')+'</th></tr></thead><tbody>';
   D.groups.forEach(g=>{
-    h+='<tr class="grp"><td colspan="7">'+nm(g)+'</td></tr>';
+    h+='<tr class="grp"><td colspan="6">'+nm(g)+'</td></tr>';
     D.sites.filter(s=>s.group===g.key).forEach(s=>{
       /* Say where each group of numbers came from, in the cell itself. Wind and
          waves resolve independently, so one row can legitimately mix a measured
@@ -341,17 +367,25 @@ function render(){
         : fv('kt',s.gust_kt,0);
       const tide=tideCell(s.tide);
       const when=whenCell(s);
-      const sea=s.hs_m==null?'–':(dirArrow(s.dp)+fv('m',s.hs_m,1))+tag(pv);
-      const tp=s.tp_s==null?'–':fv('s',s.tp_s,0);
+      /* El periodo deja de ser columna propia: 2.2 ft a 5 s y 2.2 ft a 15 s
+         miden igual y no se parecen en nada, asi que leerlos juntos es lo
+         util. Va en gris y mas pequeno porque el que manda es la altura.
+         Se declara ANTES de sea: const vive en zona muerta temporal y usarlo
+         una linea antes lanza ReferenceError, que en esta pagina se traduce en
+         una tabla vacia sin nada en pantalla que diga por que. */
+      const per=s.tp_s==null?'':' <i class="per">'+fv('s',s.tp_s,0)+'</i>';
+      /* Y va pegado a la altura, ANTES de la linea de procedencia: tag() es
+         display:block, asi que despues caia a otro renglon y se leia como si
+         el periodo viniera de otra fuente. */
+      const sea=s.hs_m==null?'–':(dirArrow(s.dp)+fv('m',s.hs_m,1)+per)+tag(pv);
       h+='<tr class="site" id="r_'+s.id+'" data-t="'+s.id+'">'+
          '<td class="m when" data-l="'+T('when')+'">'+when+'</td>'+
          '<td>'+nm(s)+'</td>'+
          '<td class="num m" data-l="'+T('wind')+'">'+w+'</td>'+
          '<td class="num m" data-l="'+T('gust')+'">'+gust+'</td>'+
          '<td class="num m" data-l="'+T('seas')+'">'+sea+'</td>'+
-         '<td class="num m" data-l="'+T('period')+'">'+tp+'</td>'+
          '<td class="num m" data-l="'+T('tide')+'">'+tide+'</td></tr>'+
-         '<tr class="drawer" id="d_'+s.id+'" hidden><td colspan="7">'+drawer(s)+'</td></tr>';
+         '<tr class="drawer" id="d_'+s.id+'" hidden><td colspan="6">'+drawer(s)+'</td></tr>';
     });
   });
   document.getElementById('board').innerHTML=h+'</tbody>';
