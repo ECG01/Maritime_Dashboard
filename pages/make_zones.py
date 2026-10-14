@@ -111,6 +111,9 @@ tr.trains .at{color:var(--ink2);margin:0 .18rem}
 table.beach{width:100%;border-collapse:collapse;font-size:.88rem}
 table.beach th{text-align:left;font:700 .68rem "Archivo",sans-serif;text-transform:uppercase;
   letter-spacing:.05em;color:var(--ink2);padding:.3rem .45rem;border-bottom:1px solid var(--line)}
+/* El grupo que abarca las dos columnas de resaca: centrado y con una linea
+   debajo que deja ver hasta donde llega. */
+table.beach th.grp{text-align:center;color:var(--s2);border-bottom:2px solid var(--s2)}
 table.beach td{padding:.34rem .45rem;border-bottom:1px solid var(--grid);vertical-align:top}
 table.beach td.z{font:700 .74rem "JetBrains Mono",monospace;color:var(--teal);white-space:nowrap}
 table.beach td.b{color:var(--ink2);font-size:.84rem}
@@ -264,9 +267,13 @@ def surf_section(srf):
             f'<td class="z">{html.escape(z.get("zone", ""))}</td>'
             f'<td>{html.escape(z.get("name") or "")}</td>'
             f'<td class="b">{html.escape(z.get("beaches") or "")}</td>'
+            # Las dos columnas de resaca van juntas. Antes la rompiente se
+            # metia entre ellas y la ultima se titulaba solo "Mañana", asi que
+            # se leia como la rompiente de mañana cuando era el riesgo de
+            # resaca. La columna del medio no puede pertenecer a otro grupo.
             f'<td>{rc_chip((d0 or {}).get("risk"))}</td>'
-            f"{surf_cell(d0)}"
             f'<td>{rc_chip((d1 or {}).get("risk"))}</td>'
+            f"{surf_cell(d0)}"
             "</tr>")
 
     high = [z for z in zones
@@ -307,11 +314,13 @@ def surf_section(srf):
     "arriba: solo un riesgo Alto se convierte en un Rip Current Statement. Las "
     "categorías y su redacción son del NWS.")}</p>
 <table class="beach"><thead><tr>
-  <th>{M.bi("Zone", "Zona")}</th><th>{M.bi("Area", "Área")}</th>
-  <th class="b">{M.bi("Beaches", "Playas")}</th>
-  <th>{M.bi("Rip current risk", "Riesgo de resaca")} &mdash; {d0h}</th>
-  <th>{M.bi("Surf", "Rompiente")}</th>
-  <th>{d1h}</th>
+  <th rowspan="2">{M.bi("Zone", "Zona")}</th>
+  <th rowspan="2">{M.bi("Area", "Área")}</th>
+  <th rowspan="2" class="b">{M.bi("Beaches", "Playas")}</th>
+  <th colspan="2" class="grp">{M.bi("Rip current risk", "Riesgo de resaca")}</th>
+  <th rowspan="2">{M.bi("Surf today", "Rompiente hoy")}</th>
+</tr><tr>
+  <th>{d0h}</th><th>{d1h}</th>
 </tr></thead><tbody>{"".join(rows)}</tbody></table>
 <div class="rcdef"><div class="colh">{M.bi(
     "Risk categories &mdash; NWS, as issued",
