@@ -111,8 +111,6 @@ I18N = {
                   "es": "No hay datos utilizables para {c} ahora mismo."},
     "notrated": {"en": "{c} is not assessed at {n} of these locations.",
                  "es": "{c} no se evalúa en {n} de estos lugares."},
-    "openin": {"en": "Open in new tab", "es": "Abrir en pestaña nueva"},
-    "loadtool": {"en": "Show the interactive tool", "es": "Mostrar la herramienta"},
     "fcst": {"en": "Forecast for this zone, as issued by NWS",
              "es": "Pronóstico para esta zona, emitido por el NWS"},
     "stations": {"en": "Stations behind this location",
@@ -202,10 +200,6 @@ td.when .stp{font-weight:600}
 .drawer .cols{display:flex;gap:1.3rem;flex-wrap:wrap}
 .drawer .col{flex:1 1 300px;min-width:250px}
 .fcsttext{font-size:.92rem;line-height:1.5}
-.embedbox{margin-top:.7rem;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.embedbox .bar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
-  padding:.45rem .7rem;background:var(--controls);font-size:.88rem}
-.embedbox iframe{display:block;width:100%;height:460px;border:0;background:var(--surface)}
 .btn2{font:600 .85rem "Source Sans 3",sans-serif;border:1px solid var(--line);
   background:var(--btn);color:var(--ink);padding:.3rem .8rem;border-radius:5px;cursor:pointer;
   text-decoration:none;display:inline-block}
@@ -459,29 +453,9 @@ function drawer(s){
     T('seas')+': '+srcs(s.obs_wave)+'<br>'+T('wind')+': '+srcs(s.obs_wind)+'</div>'+
     (s.notes_en?('<div class="g2" style="margin-top:.4rem">'+
       (L==='es'?s.notes_es:s.notes_en)+'</div>'):'')+'</div></div>';
-  if(s.embed_url){
-    h+='<div class="embedbox"><div class="bar"><span>'+
-       (L==='es'?s.embed_es:s.embed_en)+'</span><span>'+
-       '<button class="btn2" data-embed="'+s.id+'">'+T('loadtool')+'</button> '+
-       '<a class="btn2" href="'+s.embed_url+'" target="_blank" rel="noopener">'+
-       T('openin')+' ↗</a></span></div><div id="f_'+s.id+'"></div></div>';
-  }
   return h;
 }
 
-document.addEventListener('click',function(ev){
-  const b=ev.target.closest('[data-embed]');
-  if(!b)return;
-  ev.stopPropagation();
-  const s=D.sites.find(x=>x.id===b.dataset.embed); if(!s)return;
-  const box=document.getElementById('f_'+s.id);
-  if(box.querySelector('iframe'))return;
-  const f=document.createElement('iframe');
-  f.src=s.embed_url; f.loading='lazy'; f.title=s.embed_en;
-  f.referrerPolicy='no-referrer-when-downgrade';
-  f.setAttribute('sandbox','allow-scripts allow-same-origin allow-popups allow-forms');
-  box.appendChild(f); b.disabled=true;
-});
 
 function renderNws(){
   const el=document.getElementById('nws');
@@ -521,12 +495,7 @@ function renderNws(){
    is not. Every POLL_MS the page pulls board.json and, if the build timestamp
    changed, swaps the data in and redraws.
 
-   Two things it deliberately does NOT do:
-   - It never redraws while an embedded CARICOOS tool is loaded in an open drawer.
-     Rebuilding the table would tear down that iframe and throw away whatever map
-     the user had panned to. In that case only the provenance bar is updated, and
-     the full redraw waits until the drawer is closed.
-   - It never blanks anything on failure. A failed poll leaves the current data on
+   One thing it deliberately does NOT do: it never blanks anything on failure. A failed poll leaves the current data on
      screen; the bar keeps ageing and turns amber on its own, which is the honest
      signal that what you are reading is getting old. */
 const POLL_MS = 180000;
@@ -557,11 +526,6 @@ async function poll(){
       return;
     }
     D=fresh;
-    if(document.querySelector('.embedbox iframe')){
-      /* a tool is loaded - refresh only the bar, redraw once it is closed */
-      document.getElementById('stamp').innerHTML=renderStamp();
-      return;
-    }
     const open=openDrawers();
     render(); renderNws(); reopen(open);
     flash(T('updated'), false);
@@ -722,10 +686,8 @@ def main():
 <div id="pollnote" class="pollnote"></div>
 <div id="nws" class="nws"></div>
 <table class="board" id="board"></table>
-<p class="hint">{M.bi("Tap a row to see the forecast behind it and open the CARICOOS tool "
-                      "for that location.",
-                      "Toque una fila para ver el pronóstico detrás y abrir la herramienta "
-                      "CARICOOS de ese lugar.")}</p>
+<p class="hint">{M.bi("Tap a row to see the forecast behind it.",
+                      "Toque una fila para ver el pronóstico detrás.")}</p>
 """
     gen = M.bi(
         f"From the NWS {d['office']} Coastal Waters Forecast issued "
