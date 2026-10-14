@@ -514,6 +514,50 @@ def mesonet_wind(env, src):
         ds.close()
 
 
+def coops_wind(env, s):
+    """Viento de una estacion meteorologica de NOAA CO-OPS.
+
+    Son las MISMAS estaciones fisicas cuyo nivel del agua ya lee fetch_tides:
+    cuatro de las doce llevan tambien anemometro. Importan porque estan EN el
+    puerto. Christiansted leia el viento de Sandy Point, a 23 km al otro lado
+    de St. Croix, y Mayaguez de Club Deportivo a 14 km costa arriba.
+
+    No se leen por NDBC, que redistribuye el mismo sensor: su archivo
+    realtime2 iba CUATRO HORAS atrasado cuando se comprobo, mientras CO-OPS
+    servia la misma estacion con ocho minutos.
+
+    Se pide en metrico (m/s) y se convierte aqui, como hace ndbc(). La API no
+    declara unidades en la respuesta, asi que fiarse de la palabra "english"
+    seria adivinar; se verifico que english/metric = 1.945, el factor de
+    nudos a m/s exacto, pero el camino SI es el que no depende de eso.
+    """
+    url = (f'{env["COOPS_API"]}?product=wind&application=CariCOOS'
+           f'&date=latest&station={s["endpoint"]}&time_zone=gmt'
+           f'&units=metric&format=json')
+    d = M.http_json(url, env["NWS_USER_AGENT"], accept="application/json")
+    if not isinstance(d, dict) or d.get("error"):
+        return None
+    rows = d.get("data") or []
+    if not rows:
+        return None
+    r = rows[0]
+
+    def n(k):
+        try:
+            return float(r[k])
+        except (KeyError, TypeError, ValueError):
+            return None
+
+    t = r.get("t") or ""
+    if len(t) < 16:
+        return None
+    w, g = n("s"), n("g")
+    return {"obs_utc": M.parts_to_iso(t[0:4], t[5:7], t[8:10], t[11:13], t[14:16]),
+            "wind_kt": None if w is None else w * MPS_TO_KT,
+            "gust_kt": None if g is None else g * MPS_TO_KT,
+            "wdir_deg": n("d"), "qc": None}
+
+
 def ndbc(env, want):
     try:
         txt = M.http_text(env["NDBC_LATEST"], env["NWS_USER_AGENT"])
@@ -558,7 +602,8 @@ def _fetch_one(env, s):
         # devuelven None como hacia el if/elif original. Con corchetes lanzaban
         # KeyError y, antes de aislar los fallos, eso tumbaba el run entero.
         fn = {"cdip": cdip_waves, "caricoos_mesonet": mesonet_wind,
-              "windnet_nc": windnet_nc, "windnet_dap": windnet_dap}.get(prov)
+              "windnet_nc": windnet_nc, "windnet_dap": windnet_dap,
+              "coops_met": coops_wind}.get(prov)
         return fn(env, s) if fn else None
 
     r = buoy_waves(env, s)
