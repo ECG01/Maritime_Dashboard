@@ -298,11 +298,12 @@ function tideCell(t){
     h+='<span class="'+(t.observed!=null?'g2 sw':'stp')+'" title="'+
        T('tidenexthelp')+'">'+T('tidenext')+' '+
        (nx.type==='H'?T('hi'):T('lo'))+' '+hm12(when)+'</span>';
-    /* La segunda solo donde hay sensor. Esas filas ya traen nivel y sentido, y
-       con dos vueltas por delante se puede planificar una salida y un regreso;
-       en una estacion de solo prediccion seria una fila mas alta sin el dato
-       que la hace util. */
-    const after = t.observed!=null ? futureTides(t)[1] : null;
+    /* Las dos vueltas, haya sensor o no. Estuvo un tiempo limitado a las filas
+       con sensor, por no hacerlas mas altas sin el dato que las hace utiles.
+       Era al reves: donde no hay sensor las dos vueltas son TODO lo que hay,
+       asi que es ahi donde mas falta hacen. Como las predicciones alternan, la
+       primera y la segunda son siempre una alta y una baja. */
+    const after = futureTides(t)[1];
     if(after)
       h+='<span class="g2 sw" title="'+T('tidenexthelp')+'">'+T('tidethen')+' '+
          (after.type==='H'?T('hi'):T('lo'))+' '+
