@@ -27,6 +27,7 @@ fi
 
 log "start"
 "$PYTHON" pages/make_zones.py >> "$LOG" 2>&1 || log "WARN: zones failed (rc=$?)"
+"$PYTHON" pages/make_surf.py >> "$LOG" 2>&1 || log "WARN: surf failed (rc=$?)"
 
 # Publish. --delay-updates stages the whole set and renames at the end, so a
 # browser never catches a half-written page mid-transfer.

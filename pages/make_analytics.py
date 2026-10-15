@@ -40,10 +40,14 @@ EVENT_NAMES = {
     "toggle_tz":     ("Time zone switched", "Zona horaria cambiada"),
 }
 
+# Los nombres viejos se quedan: el registro de eventos tiene meses de filas con
+# "tools.html" y "NWS forecast", y borrar la etiqueta no borra la historia.
 PAGE_NAMES = {
     "index.html":        ("Conditions now", "Condiciones ahora"),
-    "marine_zones.html": ("NWS forecast", "Pronóstico NWS"),
-    "tools.html":        ("Tools", "Herramientas"),
+    "marine_zones.html": ("NWS Marine Forecast", "Pronóstico Marino NWS"),
+    "surf_zone.html":    ("NWS Surf Zone", "Zona de Rompiente NWS"),
+    "tools.html":        ("Data Analysis", "Análisis de Datos"),
+    "model_viewer.html": ("Model Viewer", "Visor de Modelos"),
     "analytics.html":    ("Usage", "Uso"),
 }
 

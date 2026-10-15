@@ -84,10 +84,20 @@ a stale Hs presented as current.
 
 ## 8. Embedded tools
 
-All four load over HTTPS inside `tools.html`, the click-to-load poster defers
-them, and every "Open in new tab" link resolves. None of the four sends
-`X-Frame-Options` or a `frame-ancestors` CSP (verified), but re-check if a page
-ever fails to frame.
+The two hubs load over HTTPS inside `tools.html` behind the click-to-load poster;
+the Model Viewer loads eagerly on `model_viewer.html`, because a reader who opened
+that tab has already asked for it. Every "Open in new tab" link resolves. None of
+the four sends `X-Frame-Options` or a `frame-ancestors` CSP (verified), but
+re-check if a page ever fails to frame.
+
+The classic Model Viewer is `http://` only and therefore a link, never a frame,
+on any https deployment. It sits under the Model Viewer tab rather than under
+Data Analysis: both are model viewers.
+
+`model_viewer.html` carries **no Ask panel** - no button, no markup, no script,
+no CSS (`page_shell(..., chat=False)`). Check that the floating button is absent
+there and still present on the other four, and that walking through that tab with
+the panel open does not close it on the way back.
 
 ## 9. Locking and determinism
 

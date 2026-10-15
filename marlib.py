@@ -245,6 +245,7 @@ STATUS_CSS = r"""
   --warn:#e09b2d; --warn-ink:#1a1206; --nodata:#6d8291;}}
 :root[data-theme="dark"]{--warn:#e09b2d; --warn-ink:#1a1206; --nodata:#6d8291;}
 
+
 .chip{display:inline-flex;align-items:center;gap:.36em;font:600 .82rem "Source Sans 3",sans-serif;
   padding:.16rem .55rem;border-radius:999px;white-space:nowrap;border:1px solid transparent}
 .chip .g{font-size:.9em;line-height:1}
@@ -630,9 +631,21 @@ def chat_widget(env):
     return html, js
 
 
+# Cinco pestañas, en el orden en que se decide: primero lo que miden los
+# instrumentos, luego el pronóstico oficial, luego el riesgo de playa, y al
+# final las dos herramientas. nav.tabs ya desborda en horizontal, así que en
+# un teléfono las últimas se alcanzan deslizando y ninguna se parte.
+#
+# "NWS Marine Forecast", no "Advisory": lo que esta página reproduce es el
+# Coastal Waters Forecast, que es un pronóstico. Un advisory es otro producto
+# del NWS (Small Craft Advisory, por ejemplo) y aparece en su propio panel
+# cuando está vigente. Ponerle "Advisory" a un pronóstico de rutina gastaría
+# la palabra que tiene que quedar libre para cuando el NWS sí emita uno.
 NAV = [("index.html", "Conditions now", "Condiciones ahora"),
-       ("marine_zones.html", "NWS forecast", "Pronóstico NWS"),
-       ("tools.html", "Tools", "Herramientas")]
+       ("marine_zones.html", "NWS Marine Forecast", "Pronóstico Marino NWS"),
+       ("surf_zone.html", "NWS Surf Zone", "Zona de Rompiente NWS"),
+       ("tools.html", "Data Analysis", "Análisis de Datos"),
+       ("model_viewer.html", "Model Viewer", "Visor de Modelos")]
 
 SHELL_CSS = r"""
 *{box-sizing:border-box}
@@ -789,11 +802,18 @@ def analytics_js(env, slug):
 
 
 def page_shell(slug, title_en, title_es, sub_en, sub_es, body, extra_css="",
-               extra_head="", scripts="", generated="", i18n=""):
-    """The bilingual frame every generated page renders into."""
+               extra_head="", scripts="", generated="", i18n="", chat=True):
+    """The bilingual frame every generated page renders into.
+
+    chat=False leaves the Ask panel out entirely - markup, CSS and script. The
+    Model Viewer page asks for that: the assistant answers from the measurements
+    on the board, the map is a model, and a floating button over a full-screen
+    map is in the way of the thing the reader came for.
+    """
     env = load_env()
     ensure_assets()
-    chat_html, chat_js = chat_widget(env)
+    chat_html, chat_js = chat_widget(env) if chat else ("", "")
+    chat_css = CHAT_CSS if chat else ""
     cf_beacon = cf_analytics(env)
     track_js = analytics_js(env, slug)
     tabs = "".join(
@@ -809,7 +829,7 @@ def page_shell(slug, title_en, title_es, sub_en, sub_es, body, extra_css="",
 {H.FONTS_LINK}
 {extra_head}
 {cf_beacon}
-<style>{H.THEME_CSS}{H.LANG_CSS}{STATUS_CSS}{SHELL_CSS}{CHAT_CSS}{extra_css}</style>
+<style>{H.THEME_CSS}{H.LANG_CSS}{STATUS_CSS}{SHELL_CSS}{chat_css}{extra_css}</style>
 </head>
 <body>
 {H.LANG_BOOT_JS}

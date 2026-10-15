@@ -30,6 +30,25 @@ names.** Nothing CariCOOS computes ever borrows them.
 
 `docs/VERIFY.md` has a terminology grep that gates every release.
 
+## The five panels
+
+| tab | file | what it is |
+|---|---|---|
+| **Conditions now** | `index.html` | what the instruments are reading, 14 locations |
+| **NWS Marine Forecast** | `marine_zones.html` | the Coastal Waters Forecast, verbatim, 10 marine zones |
+| **NWS Surf Zone** | `surf_zone.html` | rip current risk and surf, 12 beach zones |
+| **Data Analysis** | `tools.html` | the Ocean Buoys and Wind Stations hubs, embedded |
+| **Model Viewer** | `model_viewer.html` | the CARICOOS Model Viewer, full width |
+
+The second tab is called **Forecast and not Advisory** deliberately. The Coastal
+Waters Forecast is a forecast; an *advisory* is a different NWS product with a
+different meaning for the person reading it, and it gets its own panel inside the
+board when one is actually in effect. Spending the word on a routine forecast
+would leave nothing to say when the NWS issues the real thing.
+
+The file names predate the labels and are kept: they are bookmarked, and the
+analytics event log is keyed by filename.
+
 ## How it works
 
 A Python batch pipeline that generates static HTML — same shape as `buoys-ops`.
@@ -82,12 +101,13 @@ On a dev machine set `DASHBOARD_WEBROOT=""` to disable publishing.
 ```bash
 ./run_fetch.sh            # NWS forecast + instrument observations + tides
 ./run_pages_now.sh        # rebuild the board
-./run_pages_forecast.sh   # rebuild the NWS forecast page
-./run_daily.sh            # zone outlines, tools page, zone re-check
+./run_pages_forecast.sh   # rebuild the NWS forecast and surf zone pages
+./run_daily.sh            # zone outlines, Data Analysis + Model Viewer pages, zone re-check
 
 $PYTHON tools/check_ratings.py         # golden vectors, no network
 $PYTHON tools/check_hublib_drift.py    # vendored code still matches buoylib
-$PYTHON tools/check_determinism.sh conditions:index zones:marine_zones tools:tools
+$PYTHON tools/check_determinism.sh conditions:index zones:marine_zones \
+    surf:surf_zone tools:tools modviewer:model_viewer
 ```
 
 ## How often things update
@@ -95,8 +115,8 @@ $PYTHON tools/check_determinism.sh conditions:index zones:marine_zones tools:too
 ```cron
 */10 * * * *        run_fetch.sh            # instruments (mesonet is ~5-minutely), tides, CWF
 2-59/10 * * * *     run_pages_now.sh        # board, two minutes behind each fetch
-5,35 * * * *        run_pages_forecast.sh   # NWS forecast page (CWF issues ~4x/day + amendments)
-35 3 * * *          run_daily.sh            # zone outlines, tools page, zone re-check
+5,35 * * * *        run_pages_forecast.sh   # NWS forecast + surf zone (CWF issues ~4x/day + amendments)
+35 3 * * *          run_daily.sh            # zone outlines, Data Analysis + Model Viewer, zone re-check
 ```
 
 The board also refreshes **itself**. A page left open polls `board.json` every three
@@ -157,11 +177,15 @@ Locally: <http://127.0.0.1:8777/analytics.html>.
 
 ## The Surf Zone Forecast — and why it is here
 
-`marine_zones.html` carries the NWS **Surf Zone Forecast** (SRF): rip current
+`surf_zone.html` carries the NWS **Surf Zone Forecast** (SRF): rip current
 risk and surf height for the 12 beach zones of Puerto Rico and the USVI, with
 the risk categories quoted in the NWS's own words.
 
-It has its own panel because **the alerts feed cannot show it.** A Low or
+It has its own **page**, and not a block at the top of the marine forecast,
+because the two serve different people: rip current risk is a swimmer's number
+and the Coastal Waters Forecast is a vessel's, and each was burying the other.
+
+It is in the navigation at all because **the alerts feed cannot show it.** A Low or
 Moderate rip current risk is never issued as a product, so "no NWS products in
 effect" can be perfectly true on a day when a Moderate risk — *life-threatening
 rip currents are possible in the surf zone*, in the NWS's wording — is forecast

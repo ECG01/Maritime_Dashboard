@@ -171,8 +171,8 @@ Buoys Hub is not on this machine. That is correct.
 ### 4.5 Turn publishing on
 
 Set `DASHBOARD_WEBROOT` to the real document root, re-run `./run_pages_now.sh`,
-and confirm the webroot contains `index.html`, `marine_zones.html`, `tools.html`,
-`board.json`, `chat_context.json`, `assets/` — **and does not contain
+and confirm the webroot contains `index.html`, `marine_zones.html`,
+`surf_zone.html`, `tools.html`, `model_viewer.html`, `board.json`, `chat_context.json`, `assets/` — **and does not contain
 `analytics.html` or `analytics.json`.** Those are excluded on purpose; see §8.
 
 ### 4.6 Install cron
@@ -201,8 +201,9 @@ Serve the directory. Nothing else. Two things worth setting:
   Note that on dm2 the shipped `.htaccess` is inert — nginx serves the statics
   directly and never reads it — so do not assume the file is doing anything.
 - **HTTPS.** The classic Model Viewer is linked over `http://` on purpose (its S3
-  imagery only answers over HTTP), and `tools.html` already detects mixed content
-  and offers it as a link instead of an iframe. That is handled; do not "fix" it.
+  imagery only answers over HTTP), and it is offered as a link and never framed.
+  `model_viewer.html` and `tools.html` both detect mixed content and fall back to
+  the link on their own. That is handled; do not "fix" it.
 
 ---
 
@@ -608,8 +609,9 @@ Then in a browser, on the real URL:
 - [ ] EN ⇄ ES flips **everything**, including table cells built by JavaScript
 - [ ] Units kt/ft ⇄ metric changes values *and* the limits inside tooltips
 - [ ] UTC ⇄ AST shifts the times
-- [ ] The NWS forecast page shows the zones, the Surf Zone Forecast panel and the map
-- [ ] All four tools load on the tools page; the classic viewer appears as a link, not a broken frame
+- [ ] The NWS Marine Forecast page shows the zones and the map
+- [ ] The NWS Surf Zone page shows 12 beach zones with a risk chip per day
+- [ ] Both hubs load on Data Analysis; the Model Viewer fills its own tab; the classic viewer appears as a link, not a broken frame
 - [ ] `NOT FOR NAVIGATION / NO PARA LA NAVEGACIÓN` is visible in both languages on every page
 - [ ] Terminology gate: `grep -riE 'advisor|warning|watch|aviso|advertencia|vigilancia' web/out/` — every hit must be inside a verbatim NWS quote, the NWS panel, a statement that no product is in effect, or a statement that our content is *not* one
 - [ ] `analytics.html` is **not** reachable at the public URL

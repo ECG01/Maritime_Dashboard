@@ -1,11 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Generate web/out/tools.html - the four existing CARICOOS tools, embedded.
+"""Generate web/out/tools.html - the CARICOOS data hubs, embedded.
 
-Each tool sits behind a click-to-load poster rather than an eager iframe: the
-Model Viewer is a full MapLibre application and the two hubs carry large data
-chunks, so loading all four on page open would cost a mariner on a phone several
-megabytes before they had asked for anything.
+Titled "Data Analysis" in the navigation while the file keeps its old name: the
+page is bookmarked and the analytics event log is keyed by filename, and neither
+is worth breaking to make a URL match a label.
+
+The two model viewers used to live here too and now have their own tab
+(pages/make_modviewer.py). What is left is what the name claims: the archives you
+go to in order to work a number out, not a map you go to for the pattern.
+
+Each hub sits behind a click-to-load poster rather than an eager iframe: they
+carry large data chunks, so loading both on page open would cost a mariner on a
+phone several megabytes before they had asked for anything.
 
 Every tool also carries an 'Open in new tab' link. Framing a map application
 breaks its deep links and the back button, so the escape hatch is not optional.
@@ -39,26 +46,6 @@ TOOLS = [
       "berthing window.",
       "Úselo cuando el viento sea el factor decisivo: una costa de sotavento, un canal "
       "racheado o una ventana de atraque.")),
-    ("modviewer", "MODVIEWER_URL",
-     ("Model Viewer", "Visor de Modelos"),
-     ("Interactive map of the forecast models &mdash; winds, waves, currents, water level, "
-      "radar and satellite &mdash; over Puerto Rico and the U.S. Virgin Islands.",
-      "Mapa interactivo de los modelos de pronóstico: vientos, oleaje, corrientes, nivel del "
-      "mar, radar y satélite sobre Puerto Rico y las Islas Vírgenes."),
-     ("Use it to see the <i>pattern</i>: where a swell is coming from, how a front is moving, "
-      "or what the current is doing across a passage.",
-      "Úselo para ver el <i>patrón</i>: de dónde viene una marejada, cómo se mueve un frente "
-      "o qué hace la corriente en un canal.")),
-    ("classic", "CLASSIC_VIEWER_URL",
-     ("Model Viewer (classic)", "Visor de Modelos (clásico)"),
-     ("The original model dashboard: animated WRF, SWAN, FVCOM, RTOFS and STOFS forecast "
-      "imagery.",
-      "El tablero de modelos original: animaciones de los pronósticos WRF, SWAN, FVCOM, "
-      "RTOFS y STOFS."),
-     ("Use it for a quick animated loop of a single model, or when you want the familiar "
-      "view.",
-      "Úselo para un lazo animado rápido de un solo modelo, o cuando prefiera la vista "
-      "de siempre.")),
 ]
 
 CSS = r"""
@@ -157,27 +144,30 @@ def main():
 </div>""")
 
     lead = M.bi(
-        "These are the four CARICOOS tools this dashboard draws on. Each one can be shown "
-        "inline here, or opened full screen in its own tab &mdash; which is usually better if "
-        "you want to zoom around a map or keep a link. Nothing loads until you ask for it.",
-        "Estas son las cuatro herramientas de CARICOOS en las que se apoya este tablero. Cada "
-        "una puede mostrarse aquí mismo o abrirse a pantalla completa en su propia pestaña, lo "
-        "cual suele ser mejor si quiere moverse por un mapa o guardar un enlace. Nada se carga "
-        "hasta que usted lo pida.")
+        "The CARICOOS archives this dashboard draws on. The board above shows you what the "
+        "instruments read right now; these let you work out why &mdash; the full time series, "
+        "the record, the quality flags. Each can be shown inline here or opened full screen in "
+        "its own tab, which is usually better if you want to keep a link. Nothing loads until "
+        "you ask for it.",
+        "Los archivos de CARICOOS en los que se apoya este tablero. El tablero le enseña qué "
+        "están leyendo los instrumentos ahora; estos le dejan averiguar por qué: la serie "
+        "completa, el histórico, las banderas de calidad. Cada uno puede mostrarse aquí mismo "
+        "o abrirse a pantalla completa en su propia pestaña, lo cual suele ser mejor si quiere "
+        "guardar un enlace. Nada se carga hasta que usted lo pida.")
 
     body = f'<p class="lead">{lead}</p>{"".join(cards)}'
-    gen = M.bi("The tools above are maintained separately; this page only links and frames them.",
-               "Las herramientas anteriores se mantienen por separado; esta página solo las "
-               "enlaza y las enmarca.")
-    out_html = M.page_shell("tools.html", "Tools", "Herramientas",
-                            "The CARICOOS tools behind this board",
-                            "Las herramientas de CARICOOS tras este tablero",
+    gen = M.bi("The hubs above are maintained separately; this page only links and frames them.",
+               "Los centros anteriores se mantienen por separado; esta página solo los "
+               "enlaza y los enmarca.")
+    out_html = M.page_shell("tools.html", "Data Analysis", "Análisis de Datos",
+                            "The CARICOOS data hubs behind this board",
+                            "Los centros de datos de CARICOOS tras este tablero",
                             body, extra_css=CSS, scripts=JS, generated=gen,
                             i18n='const I18N={load:{en:"Show here",es:"Mostrar aqu\u00ed"},'
                                  'hide:{en:"Hide",es:"Ocultar"}};')
     out = os.path.join(M.WEBOUT, "tools.html")
     M.atomic_write_text(out_html, out)
-    print(f"[make_tools] wrote {out} ({len(out_html):,} bytes, {len(TOOLS)} tools)")
+    print(f"[make_tools] wrote {out} ({len(out_html):,} bytes, {len(TOOLS)} hubs)")
     return 0
 
 

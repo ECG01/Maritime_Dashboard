@@ -31,6 +31,7 @@ log "start"
 # day, and parsing a 1.8 MB page every cycle would be pure waste.
 "$PYTHON" fetch/fetch_climatology.py >> "$LOG" 2>&1 || log "WARN: climatology failed (rc=$?)"
 "$PYTHON" pages/make_tools.py >> "$LOG" 2>&1 || log "WARN: tools failed (rc=$?)"
+"$PYTHON" pages/make_modviewer.py >> "$LOG" 2>&1 || log "WARN: modviewer failed (rc=$?)"
 "$PYTHON" fetch/fetch_nws.py --zones >> "$LOG" 2>&1 || log "WARN: zonecheck failed (rc=$?)"
 
 # Publish. --delay-updates stages the whole set and renames at the end, so a
