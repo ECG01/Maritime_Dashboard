@@ -103,12 +103,37 @@ the panel open does not close it on the way back.
 
 ```bash
 ./run_pages_now.sh & ./run_pages_now.sh     # the second logs "skipping", exits 0
-./tools/check_determinism.sh conditions:index zones:marine_zones tools:tools
+./tools/check_determinism.sh conditions:index zones:marine_zones \
+    surf:surf_zone tools:tools modviewer:model_viewer
 ```
 The determinism check masks the run timestamp, which appears **both** as footer
 prose and as the `generated_utc` key inside the injected JSON payload. That
 payload is one very long line, so masking only the footer makes every
 payload-bearing page look non-deterministic when it is not.
+
+**That mask is why the "Data as of" stamp writes the build time once, under that
+exact key.** The stamp's `gen: true` row reads it back at render time instead of
+carrying its own copy. A second, differently-named timestamp in the same payload
+is not masked, and the page then differs on every run — this check caught exactly
+that on the first pass when the stamp was added to the two NWS pages.
+
+## 9b. The "Data as of" stamp
+
+On the board, the NWS Marine Forecast and the NWS Surf Zone. Check on each:
+
+- The issue line carries **day, month and year**, not just a time. Its absence was
+  the original complaint: you had to scroll to the footer to learn whether what you
+  were reading was from today.
+- It follows the **UTC ⇄ AST** button and the **EN ⇄ ES** switch. A stamp frozen in
+  UTC while the rest of the page reads AST is worse than no stamp.
+- Past 45 minutes without a rebuild the frame turns amber and a warning appears
+  under it. Force it with a generator run whose `utcnow()` is shifted back 3 hours.
+
+The component is `marlib.STAMP_CSS` / `STAMP_HTML` / `stamp_js()`, shared by the
+three pages. Its whole body sits inside an IIFE exposing only `paintStamp`,
+because the board declares its own `hm12`, `fullDate`, `MON` and `ago` in the same
+`<script>`: a second declaration of any of those is a `SyntaxError` that blanks
+the page with nothing on screen to say why.
 
 ## 10. Mobile
 

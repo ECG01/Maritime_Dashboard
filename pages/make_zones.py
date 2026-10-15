@@ -315,6 +315,7 @@ def main():
         "de CariCOOS de los números, y sí está traducido.")
 
     body = f"""
+{M.STAMP_HTML}
 <div id="nws" class="nws"><h3>{M.bi("NWS products in effect", "Productos del NWS vigentes")}</h3>
 {prods}
 <div class="attrib">{M.bi(
@@ -338,6 +339,13 @@ def main():
         f"{(cwf.get('issued_utc') or '?')[:16]}Z &middot; "
         f'<a href="{cwf.get("product_url", "")}">producto completo &#8599;</a>. '
         f"Se actualiza cada 30 minutos.")
+    # El sello sigue al boton UTC/AST y al idioma, asi que se repinta en los dos.
+    stamp = M.stamp_js([
+        {"en": "NWS forecast issued", "es": "Pron\u00f3stico NWS emitido",
+         "iso": cwf.get("issued_utc"), "date": True},
+        {"en": "Page built", "es": "P\u00e1gina generada",
+         "gen": True, "ago": True},
+    ], M.utcnow().isoformat())
     JS = """
 function onUnits(){
   document.querySelectorAll('[data-v]').forEach(el=>{
@@ -345,15 +353,16 @@ function onUnits(){
     el.textContent = v===''? '\\u2013' : fv(k, parseFloat(v), k==='s'?0:1);
   });
 }
-function onLang(){}
-function onTZ(){}
+function onLang(){paintStamp();}
+function onTZ(){paintStamp();}
 onUnits();
-"""
+""" + stamp
     out_html = M.page_shell("marine_zones.html",
                             "NWS Marine Forecast", "Pronóstico Marino NWS",
                             "The official forecast, as issued",
                             "El pronóstico oficial, tal como se emitió",
-                            body, extra_css=CSS, scripts=JS, generated=gen)
+                            body, extra_css=CSS + M.STAMP_CSS, scripts=JS,
+                            generated=gen)
     out = os.path.join(M.WEBOUT, "marine_zones.html")
     M.atomic_write_text(out_html, out)
     print(f"[make_zones] wrote {out} ({len(out_html):,} bytes, {len(order)} zones, "

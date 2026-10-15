@@ -209,8 +209,8 @@ function onUnits(){
     el.textContent = v===''? '\\u2013' : fv(k, parseFloat(v), k==='s'?0:1);
   });
 }
-function onLang(){}
-function onTZ(){}
+function onLang(){paintStamp();}
+function onTZ(){paintStamp();}
 onUnits();
 """
 
@@ -231,7 +231,7 @@ def main():
         "perfectamente tranquilos. La categoría de riesgo y la altura de rompiente "
         "de abajo son del Servicio Nacional de Meteorología, por zona de playa.")
 
-    body = f'<p class="lead">{lead}</p>\n{surf_section(srf)}'
+    body = f'{M.STAMP_HTML}<p class="lead">{lead}</p>\n{surf_section(srf)}'
     gen = M.bi(
         f"NWS {srf.get('office', 'SJU')} Surf Zone Forecast issued "
         f"{(srf.get('issued_utc') or '?')[:16]}Z. Refreshes every 30 minutes.",
@@ -243,7 +243,15 @@ def main():
                             "Pronóstico de Zona de Rompiente NWS",
                             "Rip current risk and surf, by beach zone",
                             "Riesgo de resaca y rompiente, por zona de playa",
-                            body, extra_css=CSS, scripts=JS, generated=gen)
+                            body, extra_css=CSS + M.STAMP_CSS,
+                            scripts=JS + M.stamp_js([
+                                {"en": "Surf Zone Forecast issued",
+                                 "es": "Pron\u00f3stico de rompiente emitido",
+                                 "iso": srf.get("issued_utc"), "date": True},
+                                {"en": "Page built", "es": "P\u00e1gina generada",
+                                 "gen": True, "ago": True},
+                            ], M.utcnow().isoformat()),
+                            generated=gen)
     out = os.path.join(M.WEBOUT, "surf_zone.html")
     M.atomic_write_text(out_html, out)
     print(f"[make_surf] wrote {out} ({len(out_html):,} bytes, {len(zones)} beach zones)")

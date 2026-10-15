@@ -335,6 +335,116 @@ LEGEND_BI = {
 }
 
 
+# --------------------------------------------------------------------------
+# el sello "Data as of"
+# --------------------------------------------------------------------------
+# Nacio en el tablero y ahora lo usan tambien las dos paginas del NWS. El motivo
+# por el que existe es el mismo en las tres: la hora de emision vivia en el pie
+# de pagina y habia que bajar hasta el final para saber si lo que se estaba
+# leyendo era de hoy.
+#
+# Se pinta en el navegador y no en el servidor, aunque el resto de estas dos
+# paginas sea HTML ya armado. Un sello congelado en UTC mientras el boton dice
+# AST es peor que no tener sello, y la fecha tiene que seguir al idioma.
+#
+# TODO va dentro de una IIFE y solo sale paintStamp. El tablero ya declara sus
+# propios hm12, fullDate, MON y ago en el mismo <script>, y una segunda
+# declaracion de cualquiera de esos nombres es SyntaxError: la pagina entera se
+# queda en blanco sin decir por que. Es la misma clase de fallo que ya mordio a
+# este proyecto dos veces.
+STAMP_CSS = r"""
+.stamp{margin:0 0 .9rem}
+.stamp-in{display:flex;gap:.2rem 1.3rem;flex-wrap:wrap;align-items:baseline;
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:.5rem .85rem;font-size:.88rem}
+.stamp-in .lab{font:700 .7rem "Archivo",sans-serif;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink2)}
+.stamp-in .it{font-variant-numeric:tabular-nums}
+.stamp-in .it b{font-weight:600;color:var(--ink2);font-size:.82rem}
+.stamp-in .g2{color:var(--ink2)}
+.stamp-in .tzl{margin-left:auto;font:600 .78rem "Archivo",sans-serif;color:var(--teal)}
+.stamp-in.stale{border-color:var(--warn);border-left:5px solid var(--warn)}
+.stamp-warn{margin-top:.35rem;padding:.5rem .85rem;border-radius:8px;
+  background:var(--warn);color:var(--warn-ink);font-size:.88rem}
+@media (max-width:760px){.stamp-in .tzl{margin-left:0}}
+"""
+
+STAMP_HTML = '<div id="stamp" class="stamp"></div>'
+
+
+def stamp_js(rows, generated_utc, stale_min=45):
+    """JS para el sello. rows: lista de dicts con
+
+        en, es   la etiqueta, en los dos idiomas
+        iso      instante UTC, o None si el dato falta
+        gen      True para usar generated_utc en vez de iso. La hora de
+                 construccion NO se escribe dentro de la fila: solo la clave
+                 generated_utc la enmascara tools/check_determinism.sh, y
+                 puesta dos veces la pagina salia distinta en cada corrida.
+                 El chequeo lo cazo en la primera vuelta.
+        date     True para anteponer dia, mes y ano (una emision; no la hora
+                 de generado, que es siempre de hace minutos)
+        ago      True para anadir "hace N min"
+
+    generated_utc marca el sello como viejo pasados stale_min minutos. La clave
+    se llama asi dentro del JSON a proposito: es la que enmascara
+    tools/check_determinism.sh, y con cualquier otro nombre cada construccion
+    saldria distinta de la anterior y el chequeo no serviria de nada.
+    """
+    payload = _json.dumps({"rows": rows, "generated_utc": generated_utc,
+                           "stale": stale_min},
+                          ensure_ascii=False, sort_keys=True)
+    return r"""
+var paintStamp=(function(){
+  var S=%s;
+  var MONS={en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+            es:['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']};
+  function clk(iso){
+    if(!iso)return '–';
+    var s=fmtTZ(Math.floor(Date.parse(iso)/1000),false).slice(-5);
+    var h=+s.slice(0,2), ap=h<12?'AM':'PM';
+    h=h%%12||12;                    /* medianoche -> 12 AM, mediodia -> 12 PM */
+    return h+':'+s.slice(3)+' '+ap;
+  }
+  function fdate(iso){
+    if(!iso)return '–';
+    var d=new Date((Math.floor(Date.parse(iso)/1000)+TZOFF())*1000);
+    return d.getUTCDate()+' '+(MONS[L]||MONS.en)[d.getUTCMonth()]+' '+d.getUTCFullYear();
+  }
+  function mins(iso){return iso?Math.max(0,(Date.now()-Date.parse(iso))/60000):0;}
+  function ago(iso){
+    if(!iso)return '';
+    var m=mins(iso), es=(L==='es');
+    if(m<90)   return es?('hace '+Math.round(m)+' min'):(Math.round(m)+' min ago');
+    if(m<2880) return es?('hace '+Math.round(m/60)+' h'):(Math.round(m/60)+' h ago');
+    return es?('hace '+Math.round(m/1440)+' d'):(Math.round(m/1440)+' d ago');
+  }
+  function build(){
+    var old = S.generated_utc ? mins(S.generated_utc)>S.stale : false;
+    var h='<div class="stamp-in'+(old?' stale':'')+'">'+
+          '<span class="lab">'+(L==='es'?'Datos al':'Data as of')+'</span>';
+    S.rows.forEach(function(r){
+      var t = r.gen ? S.generated_utc : r.iso;
+      if(!t)return;
+      h+='<span class="it"><b>'+(L==='es'?r.es:r.en)+'</b> '+
+         (r.date?(fdate(t)+' · '):'')+clk(t)+
+         (r.ago?(' <span class="g2">('+ago(t)+')</span>'):'')+'</span>';
+    });
+    h+='<span class="tzl">'+tzLabel()+'</span></div>';
+    if(old)h+='<div class="stamp-warn">'+(L==='es'
+      ? 'Esta página no se ha actualizado hace rato — puede que no refleje el último producto emitido. Recárguela.'
+      : 'This page has not refreshed recently — it may not reflect the latest issued product. Reload it.')+'</div>';
+    return h;
+  }
+  return function(){
+    var el=document.getElementById('stamp');
+    if(el)el.innerHTML=build();
+  };
+})();
+paintStamp();
+""" % (payload,)
+
+
 def legend(statuses=("favorable", "marginal", "unfavorable", "notrated")):
     """The key, shown on the page rather than hidden in a tooltip.
 
