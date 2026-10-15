@@ -245,6 +245,27 @@ STATUS_CSS = r"""
   --warn:#e09b2d; --warn-ink:#1a1206; --nodata:#6d8291;}}
 :root[data-theme="dark"]{--warn:#e09b2d; --warn-ink:#1a1206; --nodata:#6d8291;}
 
+/* El acento del NWS pasa del naranja del hub al amarillo de CARICOOS. Se
+   redefine AQUI y no en hublib.py, que esta vendorizado byte a byte y lo vigila
+   tools/check_hublib_drift.py; este bloque sale despues de THEME_CSS en la misma
+   etiqueta <style>, asi que gana por orden sin tocar el archivo prestado.
+   Los tres bloques, igual que arriba, o el modo oscuro se queda con el naranja.
+
+   El amarillo de marca es #FFD331 (el sol del isologo) y en claro NO puede
+   usarse tal cual: contra el panel #f1f6f9 da 1.32:1, o sea un rotulo
+   ilegible y un marco de 2px que no se ve. En claro va oscurecido en la misma
+   familia de tono, y en oscuro va el amarillo de marca puro.
+
+      claro   #8a6400  ->  4.94:1 contra el panel  (el naranja daba 2.94:1)
+      oscuro  #FFD331  -> 10.65:1 contra el panel  (el naranja daba 3.94:1)
+
+   Los dos mejoran lo que habia. --s2 no es decorativo: lleva los rotulos de
+   columna, los marcos de 2px de los paneles del NWS y el punto de los lugares
+   en el mapa de zonas. */
+:root{--s2:#8a6400;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --s2:#ffd331;}}
+:root[data-theme="dark"]{--s2:#ffd331;}
 
 .chip{display:inline-flex;align-items:center;gap:.36em;font:600 .82rem "Source Sans 3",sans-serif;
   padding:.16rem .55rem;border-radius:999px;white-space:nowrap;border:1px solid transparent}
