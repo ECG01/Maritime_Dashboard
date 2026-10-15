@@ -146,12 +146,14 @@ def main():
     lead = M.bi(
         "The CARICOOS archives this dashboard draws on. The board above shows you what the "
         "instruments read right now; these let you work out why &mdash; the full time series, "
-        "the record, the quality flags. Each can be shown inline here or opened full screen in "
+        "the record, the yearly climatologies and the climate reports. Each can be shown "
+        "inline here or opened full screen in "
         "its own tab, which is usually better if you want to keep a link. Nothing loads until "
         "you ask for it.",
         "Los archivos de CARICOOS en los que se apoya este tablero. El tablero le enseña qué "
         "están leyendo los instrumentos ahora; estos le dejan averiguar por qué: la serie "
-        "completa, el histórico, las banderas de calidad. Cada uno puede mostrarse aquí mismo "
+        "completa, el histórico, las climatologías anuales y los informes climáticos. Cada uno "
+        "puede mostrarse aquí mismo "
         "o abrirse a pantalla completa en su propia pestaña, lo cual suele ser mejor si quiere "
         "guardar un enlace. Nada se carga hasta que usted lo pida.")
 
