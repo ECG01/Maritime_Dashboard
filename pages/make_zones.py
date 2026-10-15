@@ -99,6 +99,17 @@ tr.trains .at{color:var(--ink2);margin:0 .18rem}
   border-radius:8px;padding:.8rem .95rem;margin-bottom:1.1rem;line-height:1.5}
 .lead{max-width:66ch}
 
+/* El mapa se dibuja con un viewBox de 665 unidades y en un telefono cabe en
+   337 px: todo lo que lleva dentro se encoge a la mitad, asi que una etiqueta
+   de 11 px acaba en 5. Se agrandan en unidades de usuario, no en pixeles de
+   pantalla, que es lo unico que el escalado respeta. */
+@media (max-width:720px){
+  .ovlabel{font-size:19px}
+  .sitelbl{font-size:16px}
+}
+/* "pase el cursor" no significa nada en una pantalla tactil, donde no hay
+   cursor que pasar. La pista se queda para quien tiene raton. */
+@media (hover:none){.maplegend .hov{display:none}}
 @media (max-width:820px){
   .verb{border-right:0;border-bottom:1px solid var(--line)}
   .zone .zh{flex-wrap:wrap}
@@ -183,8 +194,9 @@ def overview(geo, sites):
   <div class="maplegend">
     <span><i></i>{M.bi("Marine zone &mdash; click to jump to its forecast",
                        "Zona marina &mdash; haga clic para ir a su pronóstico")}</span>
-    <span><i class="dot"></i>{M.bi("Board location &mdash; hover for its name",
-                                    "Lugar del tablero &mdash; pase el cursor para su nombre")}</span>
+    <span><i class="dot"></i>{M.bi("Board location", "Lugar del tablero")}<span
+      class="hov">{M.bi(" &mdash; hover for its name",
+                        " &mdash; pase el cursor para su nombre")}</span></span>
   </div>
 </div>"""
 

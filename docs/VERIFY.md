@@ -137,8 +137,26 @@ the page with nothing on screen to say why.
 
 ## 10. Mobile
 
-390 px: the grid becomes a horizontal scroller with sticky row labels; chips stay
-legible; the control bar un-pins.
+Sweep **1440, 1024, 820, 768, 600, 480, 390, 360 and 320 px** on all five pages.
+At every one of them `document.documentElement.scrollWidth` must equal
+`clientWidth`: the page itself never slides sideways. A box that scrolls *inside
+itself* is fine and is how the beach table survives 320 px.
+
+- **820 px** is where the board stops being a table and becomes stacked cards.
+  It used to be 760, which left 761&ndash;820 &mdash; a tablet held upright, a
+  half-screen window &mdash; with a six-column table running off the right edge.
+- In the stacked card the **place name comes first**, then the date. The row's
+  own order is name-second, so this is a flex `order` on the phone only.
+- **`tr` must NOT be in the `display:block` list.** It was, and it also unfolded
+  the provenance drawers, which hide by being bare `tr`s. Every one of the 14 sat
+  open from load; tapping still worked, so there was no symptom beyond a page
+  that measured 9634 px instead of 5201. Check: at load, zero drawers have a
+  height; one tap opens exactly one.
+- The three header buttons are **44 px tall** below 720 px. They were 23.
+- The tab bar carries scroll shadows that appear only on the side with more to
+  see. Scroll it fully left and fully right and check the shadow swaps.
+- On a **touch** profile (`hover:none`) the map legend must read "Board location"
+  with no "hover for its name" &mdash; there is no cursor to hover with.
 
 ## 11. Post-deploy smoke
 

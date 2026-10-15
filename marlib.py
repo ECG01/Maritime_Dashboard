@@ -813,7 +813,36 @@ h2{font:700 1.15rem "Archivo",sans-serif;margin:1.6rem 0 .6rem}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:1rem}
 footer{max-width:1180px;margin:0 auto;padding:0 1rem 2rem;color:var(--ink2);font-size:.85rem}
 a{color:var(--s1)}
-@media (max-width:720px){h1{font-size:1.25rem}.hwrap{padding:.7rem .8rem}main{padding:.9rem .8rem 2rem}}
+@media (max-width:720px){
+  h1{font-size:1.25rem}
+  .hwrap{padding:.7rem .8rem}
+  main{padding:.9rem .8rem 2rem}
+  /* Dedos, no cursor. Median 23 px de alto; el minimo que publican tanto
+     Apple como Google es 44, y estos tres botones son lo unico de la cabecera
+     que se toca. El texto no crece, crece el area. */
+  .unitbtn,.tzbtn,.langbtn{min-height:44px;padding:.5rem 1.05rem}
+  .ctrls{gap:.5rem}
+  /* La barra de pestanas se desliza, pero no habia modo de saberlo: la quinta
+     quedaba cortada por el borde y eso se lee como "aqui se acaba". Las dos
+     sombras son la tecnica de background-attachment: las capas "local" viajan
+     con el contenido y tapan a las "scroll" cuando se llega al extremo, asi
+     que la sombra aparece solo del lado por el que de verdad queda algo. */
+  nav.tabs .hwrap{padding:0 .55rem;scrollbar-width:none;
+    background:
+      linear-gradient(to right,var(--navy),rgba(11,58,92,0)) left/22px 100% no-repeat local,
+      linear-gradient(to left,var(--navy),rgba(11,58,92,0)) right/22px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%,rgba(255,255,255,.3),rgba(255,255,255,0)) left/12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%,rgba(255,255,255,.3),rgba(255,255,255,0)) right/12px 100% no-repeat scroll}
+  nav.tabs .hwrap::-webkit-scrollbar{display:none}
+  nav.tabs a{padding:.6rem .62rem;font-size:.85rem}
+}
+@media (max-width:640px){
+  /* La marca cede altura: en un telefono el encabezado se lleva 111 px antes
+     de que empiece el dato, y el logo es lo unico ahi que no se lee. */
+  .brand .mark{height:30px}
+  .sub{font-size:.84rem}
+  .hwrap{padding:.55rem .8rem}
+}
 """
 
 _ASSETS_DONE = False

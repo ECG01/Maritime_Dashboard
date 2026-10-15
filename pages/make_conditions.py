@@ -207,15 +207,48 @@ td.when .stp{font-weight:600}
 .lead{max-width:66ch}
 
 /* phone: the table becomes stacked cards, because a 6-column table on a
-   flybridge is unreadable */
-@media (max-width:760px){
+   flybridge is unreadable.
+
+   820 y no 760: entre esos dos anchos - una tableta en vertical, una ventana a
+   medio escritorio - la tabla seguia siendo tabla y se salia de la pantalla por
+   la derecha. 820 es ademas el punto donde la pagina de zonas ya rompe sus
+   columnas, asi que las dos cambian a la vez. */
+@media (max-width:820px){
   table.board thead{display:none}
-  table.board,table.board tbody,table.board tr,table.board td{display:block;width:100%}
-  table.board tr.site{border-bottom:1px solid var(--line);padding:.2rem 0}
-  table.board tr.site td{border-bottom:0;padding:.25rem .8rem}
-  table.board tr.site td:first-child{font-size:1.05rem;padding-top:.6rem}
+  /* OJO: "tr" NO va en esta lista, y no es un descuido. Estaba, y convertia en
+     bloque TAMBIEN las filas del cajon de procedencia, que se esconden siendo
+     tr sin display propio. Resultado: en un telefono los catorce cajones salian
+     abiertos de par en par desde el primer momento, cada fila enterrada bajo su
+     propio panel, y la pagina media 9634 px en vez de 5778. El toque para abrir
+     y cerrar seguia funcionando, asi que no habia sintoma; solo una pagina que
+     no se acababa nunca. Las filas de sitio se declaran aparte, justo abajo. */
+  table.board,table.board tbody,table.board td{display:block;width:100%}
+  /* Columna flex y no bloque suelto, para poder reordenar: en el telefono el
+     NOMBRE va primero. Apilada tal cual, la tarjeta abria con la fecha y la
+     hora de medicion, asi que habia que leer un sello antes de saber de que
+     lugar se estaba hablando - y el nombre es justo lo que se busca al
+     deslizar. En la tabla ancha el orden se queda como esta: alli la columna
+     de cuando encabeza porque tiene su propio titulo arriba. */
+  table.board tr.site{display:flex;flex-direction:column;
+    border-bottom:1px solid var(--line);padding:.2rem 0}
+  table.board tr.site td{border-bottom:0;padding:.22rem .8rem}
+  table.board tr.site td:nth-child(2){order:-1;font-size:1.12rem;font-weight:600;
+    padding-top:.55rem}
+  /* Y la fecha pasa a ser lo que es: un pie de linea, no un titular. Sin su
+     rotulo y en un solo renglon: debajo del nombre, "15 Oct - Medido 1:23 PM"
+     se explica solo, y el rotulo costaba una linea en cada una de las catorce
+     tarjetas. */
+  table.board tr.site td.when{font-size:.92rem;color:var(--ink2);
+    padding-bottom:.35rem}
   table.board td.m::before{content:attr(data-l) " ";color:var(--ink2);font-size:.8rem;
     text-transform:uppercase;letter-spacing:.04em}
+  /* La celda de cuando no lleva rotulo ni salto: justo debajo del nombre,
+     "15 Oct · Medido 1:23 PM" se explica solo, y el rotulo costaba un renglon
+     en cada una de las catorce tarjetas. Va DESPUES de la regla de arriba a
+     proposito: misma especificidad, gana la ultima. */
+  table.board td.when::before{content:none}
+  table.board td.when .stp::after{content:" · "}
+  table.board td.when .stp,table.board td.when .sw{display:inline}
   .head h2{font-size:1.15rem}
 }
 """

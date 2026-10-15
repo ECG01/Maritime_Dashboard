@@ -72,6 +72,20 @@ table.beach td.s{font-variant-numeric:tabular-nums;white-space:nowrap}
   table.beach th,table.beach td{padding:.3rem .22rem}
   .rc{padding:.12rem .42rem;font-size:.78rem}
   .rc .g{font-size:.8em}
+  /* Quien se comia el ancho era el titulo, no el dato: "TOMORROW" es una sola
+     palabra que no parte, y a .68rem con espaciado medía 80 px y dejaba la
+     columna del area en 68. Con el area estrecha "San Juan and Vicinity PR"
+     caia en tres lineas. */
+  table.beach th{font-size:.6rem;letter-spacing:.01em}
+  table.beach td.z{font-size:.68rem}
+}
+/* Por debajo de unos 380 px - un iPhone SE - ni con los titulos encogidos cabe
+   la tabla, y lo que se salia arrastraba la pagina entera de lado. Que se
+   deslice ella dentro de su caja y no el documento: asi no se pierde ni la
+   columna del codigo NWS ni ninguna de las dos de resaca. */
+@media (max-width:380px){
+  .beachwrap{overflow-x:auto}
+  .beachwrap table.beach{min-width:330px}
 }
 """
 
@@ -177,7 +191,7 @@ def surf_section(srf):
     "esta página: solo un riesgo Alto se convierte en un Rip Current Statement, y "
     "esos salen en <i>Productos del NWS vigentes</i> en el tablero de Condiciones "
     "ahora. Las categorías y su redacción son del NWS.")}</p>
-<table class="beach"><thead><tr>
+<div class="beachwrap"><table class="beach"><thead><tr>
   <th rowspan="2">{M.bi("Zone", "Zona")}</th>
   <th rowspan="2">{M.bi("Area", "Área")}</th>
   <th rowspan="2" class="b">{M.bi("Beaches", "Playas")}</th>
@@ -185,7 +199,7 @@ def surf_section(srf):
   <th rowspan="2">{M.bi("Surf today", "Rompiente hoy")}</th>
 </tr><tr>
   <th>{d0h}</th><th>{d1h}</th>
-</tr></thead><tbody>{"".join(rows)}</tbody></table>
+</tr></thead><tbody>{"".join(rows)}</tbody></table></div>
 <div class="rcdef"><div class="colh">{M.bi(
     "Risk categories &mdash; NWS, as issued",
     "Categorías de riesgo &mdash; NWS, tal como se emitieron")}</div>
